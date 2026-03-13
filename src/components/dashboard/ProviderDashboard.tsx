@@ -50,7 +50,7 @@ export function ProviderDashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("*, categories(name), service_stats(average_rating, review_count)")
+        .select("*, categories(name)")
         .eq("provider_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
