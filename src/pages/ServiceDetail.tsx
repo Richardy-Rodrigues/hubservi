@@ -60,7 +60,7 @@ export default function ServiceDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("*, categories(name), service_stats(average_rating, review_count)")
+        .select("*, categories(name)")
         .eq("category_id", service!.category_id)
         .eq("is_active", true)
         .neq("id", id!)
