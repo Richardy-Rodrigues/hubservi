@@ -292,7 +292,6 @@ export function ProviderDashboard() {
               ) : (
                 <div className="space-y-4">
                   {services.map((service: any) => {
-                    const sr = service.service_stats?.[0];
                     return (
                       <div key={service.id} className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="space-y-1">
@@ -302,13 +301,7 @@ export function ProviderDashboard() {
                               {service.is_active ? "Ativo" : "Inativo"}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">{service.categories?.name}</p>
-                          {sr?.average_rating > 0 && (
-                            <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              {Number(sr.average_rating).toFixed(1)} ({sr.review_count})
-                            </p>
-                          )}
+                          <p className="text-sm text-muted-foreground">{(service as any).categories?.name}</p>
                         </div>
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline" onClick={() => setEditingService(service)}>

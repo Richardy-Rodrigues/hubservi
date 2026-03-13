@@ -162,9 +162,8 @@ export default function Services() {
           <>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((service: any) => {
-                const stats = service.service_stats?.[0];
-                const rating = stats?.average_rating ?? 0;
-                const reviewCount = stats?.review_count ?? 0;
+                const rating = service.stats?.average_rating ?? 0;
+                const reviewCount = service.stats?.review_count ?? 0;
                 return (
                   <Link key={service.id} to={`/services/${service.id}`}>
                     <Card className="h-full transition-shadow hover:shadow-lg">

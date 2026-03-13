@@ -227,7 +227,7 @@ export default function ServiceDetail() {
                 <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Serviços Similares</h3>
                 <div className="space-y-3">
                   {similar.map((s: any) => {
-                    const sr = s.service_stats?.[0]?.average_rating ?? 0;
+                    const sr = 0;
                     return (
                       <Link key={s.id} to={`/services/${s.id}`}>
                         <Card className="transition-shadow hover:shadow-md">
