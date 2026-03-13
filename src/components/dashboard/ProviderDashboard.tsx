@@ -95,12 +95,7 @@ export function ProviderDashboard() {
     totalBookings: bookings?.length ?? 0,
     pending: bookings?.filter((b) => b.status === "pending").length ?? 0,
     completed: bookings?.filter((b) => b.status === "completed").length ?? 0,
-    avgRating: services?.length
-      ? (
-          services.reduce((acc: number, s: any) => acc + (s.service_stats?.[0]?.average_rating ?? 0), 0) /
-          services.filter((s: any) => s.service_stats?.[0]?.average_rating).length || 0
-        ).toFixed(1)
-      : "—",
+    avgRating: "—",
   };
 
   const isLoading = loadingBookings || loadingServices;
