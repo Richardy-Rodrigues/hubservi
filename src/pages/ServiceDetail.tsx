@@ -104,9 +104,8 @@ export default function ServiceDetail() {
     );
   }
 
-  const stats = (service as any).service_stats?.[0];
-  const rating = stats?.average_rating ?? 0;
-  const reviewCount = stats?.review_count ?? 0;
+  const rating = (service as any).stats?.average_rating ?? 0;
+  const reviewCount = (service as any).stats?.review_count ?? 0;
   const provider = (service as any).profiles;
 
   return (
