@@ -38,8 +38,7 @@ export default function Services() {
         .select(`
           *,
           categories(name, icon),
-          profiles!services_provider_id_fkey(full_name, avatar_url),
-          service_stats(average_rating, review_count)
+          profiles!services_provider_id_fkey(full_name, avatar_url)
         `, { count: "exact" })
         .eq("is_active", true);
 
