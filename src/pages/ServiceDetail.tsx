@@ -24,13 +24,19 @@ export default function ServiceDetail() {
         .select(`
           *,
           categories(name, icon),
-          profiles!services_provider_id_fkey(full_name, avatar_url, email),
-          service_stats(average_rating, review_count)
+          profiles!services_provider_id_fkey(full_name, avatar_url, email)
         `)
         .eq("id", id!)
         .single();
       if (error) throw error;
-      return data;
+      
+      const { data: statsData } = await supabase
+        .from("service_stats")
+        .select("average_rating, review_count")
+        .eq("service_id", id!)
+        .maybeSingle();
+      
+      return { ...data, stats: statsData };
     },
     enabled: !!id,
   });
@@ -54,7 +60,7 @@ export default function ServiceDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("*, categories(name), service_stats(average_rating, review_count)")
+        .select("*, categories(name)")
         .eq("category_id", service!.category_id)
         .eq("is_active", true)
         .neq("id", id!)
@@ -98,9 +104,8 @@ export default function ServiceDetail() {
     );
   }
 
-  const stats = (service as any).service_stats?.[0];
-  const rating = stats?.average_rating ?? 0;
-  const reviewCount = stats?.review_count ?? 0;
+  const rating = (service as any).stats?.average_rating ?? 0;
+  const reviewCount = (service as any).stats?.review_count ?? 0;
   const provider = (service as any).profiles;
 
   return (
@@ -222,7 +227,7 @@ export default function ServiceDetail() {
                 <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Serviços Similares</h3>
                 <div className="space-y-3">
                   {similar.map((s: any) => {
-                    const sr = s.service_stats?.[0]?.average_rating ?? 0;
+                    const sr = 0;
                     return (
                       <Link key={s.id} to={`/services/${s.id}`}>
                         <Card className="transition-shadow hover:shadow-md">

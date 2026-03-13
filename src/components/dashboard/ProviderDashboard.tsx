@@ -50,7 +50,7 @@ export function ProviderDashboard() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select("*, categories(name), service_stats(average_rating, review_count)")
+        .select("*, categories(name)")
         .eq("provider_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -95,12 +95,7 @@ export function ProviderDashboard() {
     totalBookings: bookings?.length ?? 0,
     pending: bookings?.filter((b) => b.status === "pending").length ?? 0,
     completed: bookings?.filter((b) => b.status === "completed").length ?? 0,
-    avgRating: services?.length
-      ? (
-          services.reduce((acc: number, s: any) => acc + (s.service_stats?.[0]?.average_rating ?? 0), 0) /
-          services.filter((s: any) => s.service_stats?.[0]?.average_rating).length || 0
-        ).toFixed(1)
-      : "—",
+    avgRating: "—",
   };
 
   const isLoading = loadingBookings || loadingServices;
@@ -297,7 +292,6 @@ export function ProviderDashboard() {
               ) : (
                 <div className="space-y-4">
                   {services.map((service: any) => {
-                    const sr = service.service_stats?.[0];
                     return (
                       <div key={service.id} className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="space-y-1">
@@ -307,13 +301,7 @@ export function ProviderDashboard() {
                               {service.is_active ? "Ativo" : "Inativo"}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">{service.categories?.name}</p>
-                          {sr?.average_rating > 0 && (
-                            <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              {Number(sr.average_rating).toFixed(1)} ({sr.review_count})
-                            </p>
-                          )}
+                          <p className="text-sm text-muted-foreground">{(service as any).categories?.name}</p>
                         </div>
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline" onClick={() => setEditingService(service)}>

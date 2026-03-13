@@ -38,8 +38,7 @@ export default function Services() {
         .select(`
           *,
           categories(name, icon),
-          profiles!services_provider_id_fkey(full_name, avatar_url),
-          service_stats(average_rating, review_count)
+          profiles!services_provider_id_fkey(full_name, avatar_url)
         `, { count: "exact" })
         .eq("is_active", true);
 
@@ -61,19 +60,25 @@ export default function Services() {
       const { data, error, count } = await query;
       if (error) throw error;
 
-      let sorted = data || [];
+      const serviceIds = (data || []).map((s) => s.id);
+      let statsMap: Record<string, { average_rating: number; review_count: number }> = {};
+      if (serviceIds.length > 0) {
+        const { data: statsData } = await supabase
+          .from("service_stats")
+          .select("service_id, average_rating, review_count")
+          .in("service_id", serviceIds);
+        if (statsData) {
+          statsData.forEach((s) => {
+            if (s.service_id) statsMap[s.service_id] = { average_rating: s.average_rating ?? 0, review_count: s.review_count ?? 0 };
+          });
+        }
+      }
+
+      let sorted = (data || []).map((s) => ({ ...s, stats: statsMap[s.id] || null }));
       if (sort === "rating") {
-        sorted = [...sorted].sort((a, b) => {
-          const ar = (a as any).service_stats?.[0]?.average_rating ?? 0;
-          const br = (b as any).service_stats?.[0]?.average_rating ?? 0;
-          return br - ar;
-        });
+        sorted = [...sorted].sort((a, b) => (b.stats?.average_rating ?? 0) - (a.stats?.average_rating ?? 0));
       } else if (sort === "popular") {
-        sorted = [...sorted].sort((a, b) => {
-          const ac = (a as any).service_stats?.[0]?.review_count ?? 0;
-          const bc = (b as any).service_stats?.[0]?.review_count ?? 0;
-          return bc - ac;
-        });
+        sorted = [...sorted].sort((a, b) => (b.stats?.review_count ?? 0) - (a.stats?.review_count ?? 0));
       }
 
       return { services: sorted, total: count ?? 0 };
@@ -157,9 +162,8 @@ export default function Services() {
           <>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((service: any) => {
-                const stats = service.service_stats?.[0];
-                const rating = stats?.average_rating ?? 0;
-                const reviewCount = stats?.review_count ?? 0;
+                const rating = service.stats?.average_rating ?? 0;
+                const reviewCount = service.stats?.review_count ?? 0;
                 return (
                   <Link key={service.id} to={`/services/${service.id}`}>
                     <Card className="h-full transition-shadow hover:shadow-lg">
