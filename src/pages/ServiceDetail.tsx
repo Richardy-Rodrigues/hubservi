@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, MapPin, ArrowLeft, User, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { BookingDialog } from "@/components/BookingDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
