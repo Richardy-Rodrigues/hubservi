@@ -89,7 +89,7 @@ export function ServiceForm({ service, onClose, onSaved }: ServiceFormProps) {
         onSaved();
       }
     } else {
-      const { error } = await supabase.from("services").insert(payload);
+      const { error } = await supabase.from("services").insert([payload]);
       setLoading(false);
       if (error) {
         toast({ title: "Erro", description: error.message, variant: "destructive" });
