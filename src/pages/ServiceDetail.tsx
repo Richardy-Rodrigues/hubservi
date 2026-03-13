@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, MapPin, ArrowLeft, User, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { BookingDialog } from "@/components/BookingDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -187,15 +188,11 @@ export default function ServiceDetail() {
                   <p className="text-sm text-muted-foreground">por hora</p>
                 )}
                 <div className="mt-6">
-                  {user ? (
-                    <Button className="w-full" size="lg" disabled>
-                      Solicitar Serviço (em breve)
-                    </Button>
-                  ) : (
-                    <Link to="/auth">
-                      <Button className="w-full" size="lg">Entre para solicitar</Button>
-                    </Link>
-                  )}
+                  <BookingDialog
+                    serviceId={service.id}
+                    providerId={service.provider_id}
+                    serviceTitle={service.title}
+                  />
                 </div>
               </CardContent>
             </Card>
