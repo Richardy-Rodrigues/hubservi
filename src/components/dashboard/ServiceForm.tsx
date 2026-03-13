@@ -75,7 +75,14 @@ export function ServiceForm({ service, onClose, onSaved }: ServiceFormProps) {
 
     setLoading(true);
     const payload = {
-      ...result.data,
+      title: result.data.title,
+      description: result.data.description,
+      category_id: result.data.category_id,
+      price_min: result.data.price_min,
+      price_max: result.data.price_max,
+      price_type: result.data.price_type as "fixed" | "hourly" | "negotiable",
+      location: result.data.location || "",
+      is_active: result.data.is_active,
       provider_id: user!.id,
     };
 
