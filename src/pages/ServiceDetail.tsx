@@ -24,13 +24,19 @@ export default function ServiceDetail() {
         .select(`
           *,
           categories(name, icon),
-          profiles!services_provider_id_fkey(full_name, avatar_url, email),
-          service_stats(average_rating, review_count)
+          profiles!services_provider_id_fkey(full_name, avatar_url, email)
         `)
         .eq("id", id!)
         .single();
       if (error) throw error;
-      return data;
+      
+      const { data: statsData } = await supabase
+        .from("service_stats")
+        .select("average_rating, review_count")
+        .eq("service_id", id!)
+        .maybeSingle();
+      
+      return { ...data, stats: statsData };
     },
     enabled: !!id,
   });
