@@ -69,6 +69,7 @@ Aplicacao local: http://localhost:8080
 ### Segurança e dados
 - RLS habilitado nas tabelas de dominio
 - Trigger de criacao automatica de profile no signup
+- Migracao corretiva para sincronizar auth.users -> profiles com backfill
 - Trigger de updated_at para tabelas principais
 - View de agregacao service_stats para rating e total de reviews
 
@@ -160,6 +161,7 @@ Local app: http://localhost:8080
 ### Security and data
 - RLS enabled in domain tables
 - Auto profile creation trigger on signup
+- Corrective migration to sync auth.users -> profiles with backfill
 - updated_at trigger for main tables
 - service_stats view for review count and rating aggregation
 

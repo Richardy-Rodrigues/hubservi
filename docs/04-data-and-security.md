@@ -30,6 +30,12 @@ Politicas principais:
 - update_updated_at_column: atualiza timestamp de atualizacao
 - validate_booking_status_transition: impede transicoes invalidas de status
 
+Sincronizacao de profiles (migracao corretiva):
+- trigger `on_auth_user_created` recriado de forma idempotente
+- `handle_new_user` com upsert para evitar falhas em duplicidade
+- backfill de `auth.users` para `public.profiles` quando houver lacunas
+- policy `Users can insert own profile` para fallback seguro com RLS
+
 ### Seguranca de aplicacao
 - Sessao gerida por Supabase Auth
 - Rota privada protegida no frontend
@@ -69,6 +75,12 @@ Core policies:
 - handle_new_user: auto-creates profile on signup
 - update_updated_at_column: updates row updated_at
 - validate_booking_status_transition: blocks invalid status transitions
+
+Profile sync (corrective migration):
+- idempotent recreation of `on_auth_user_created` trigger
+- `handle_new_user` uses upsert to avoid duplicate insertion failures
+- backfill from `auth.users` to `public.profiles` for missing rows
+- `Users can insert own profile` policy enables a safe RLS fallback
 
 ### Application security
 - Session managed by Supabase Auth
