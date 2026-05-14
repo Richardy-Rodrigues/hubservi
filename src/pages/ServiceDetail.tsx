@@ -1,6 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchPublicProfileById,
+  fetchPublicProfilesByIds,
+  type PublicProfileSummary,
+} from "@/integrations/supabase/views";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,22 +26,21 @@ export default function ServiceDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("services")
-        .select(`
-          *,
-          categories(name, icon),
-          profiles!services_provider_id_fkey(full_name, avatar_url, email)
-        `)
+        .select("*, categories(name, icon)")
         .eq("id", id!)
         .single();
       if (error) throw error;
-      
-      const { data: statsData } = await supabase
-        .from("service_stats")
-        .select("average_rating, review_count")
-        .eq("service_id", id!)
-        .maybeSingle();
-      
-      return { ...data, stats: statsData };
+
+      const [{ data: statsData }, providerRow] = await Promise.all([
+        supabase
+          .from("service_stats")
+          .select("average_rating, review_count")
+          .eq("service_id", id!)
+          .maybeSingle(),
+        fetchPublicProfileById(data.provider_id),
+      ]);
+
+      return { ...data, stats: statsData, provider: providerRow };
     },
     enabled: !!id,
   });
@@ -46,11 +50,20 @@ export default function ServiceDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("reviews")
-        .select("*, profiles!reviews_client_id_fkey(full_name, avatar_url)")
+        .select("*")
         .eq("service_id", id!)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+
+      const clientIds = Array.from(new Set((data ?? []).map((r) => r.client_id)));
+      const clientMap: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
+      if (clientIds.length > 0) {
+        const clientRows = await fetchPublicProfilesByIds(clientIds);
+        clientRows.forEach((p: PublicProfileSummary) => {
+          clientMap[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url };
+        });
+      }
+      return (data ?? []).map((r) => ({ ...r, client: clientMap[r.client_id] ?? null }));
     },
     enabled: !!id,
   });
@@ -106,7 +119,7 @@ export default function ServiceDetail() {
 
   const rating = (service as any).stats?.average_rating ?? 0;
   const reviewCount = (service as any).stats?.review_count ?? 0;
-  const provider = (service as any).profiles;
+  const provider = (service as any).provider;
 
   return (
     <Layout>
@@ -158,7 +171,7 @@ export default function ServiceDetail() {
                           <User className="h-4 w-4 text-muted-foreground" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">{review.profiles?.full_name || "Cliente"}</p>
+                          <p className="text-sm font-medium">{review.client?.full_name || "Cliente"}</p>
                           <div className="flex items-center gap-2">
                             <div className="flex">
                               {[1, 2, 3, 4, 5].map((s) => (

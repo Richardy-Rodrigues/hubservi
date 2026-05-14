@@ -13,16 +13,21 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { z } from "zod";
 
-const serviceSchema = z.object({
-  title: z.string().trim().min(3, "Título deve ter pelo menos 3 caracteres").max(100),
-  description: z.string().trim().min(10, "Descrição deve ter pelo menos 10 caracteres").max(2000),
-  category_id: z.string().uuid("Selecione uma categoria"),
-  price_min: z.number().min(0, "Preço mínimo deve ser >= 0"),
-  price_max: z.number().nullable(),
-  price_type: z.enum(["fixed", "hourly", "negotiable"]),
-  location: z.string().max(100).optional(),
-  is_active: z.boolean(),
-});
+const serviceSchema = z
+  .object({
+    title: z.string().trim().min(3, "Título deve ter pelo menos 3 caracteres").max(100),
+    description: z.string().trim().min(10, "Descrição deve ter pelo menos 10 caracteres").max(2000),
+    category_id: z.string().uuid("Selecione uma categoria"),
+    price_min: z.number().min(0, "Preço mínimo deve ser >= 0"),
+    price_max: z.number().nullable(),
+    price_type: z.enum(["fixed", "hourly", "negotiable"]),
+    location: z.string().max(100).optional(),
+    is_active: z.boolean(),
+  })
+  .refine((d) => d.price_max == null || d.price_max >= d.price_min, {
+    message: "Preço máximo deve ser maior ou igual ao mínimo",
+    path: ["price_max"],
+  });
 
 interface ServiceFormProps {
   service?: any;
@@ -194,7 +199,9 @@ export function ServiceForm({ service, onClose, onSaved }: ServiceFormProps) {
                 value={form.price_max ?? ""}
                 onChange={(e) => setForm({ ...form, price_max: e.target.value ? Number(e.target.value) : null })}
                 placeholder="Opcional"
+                aria-invalid={!!errors.price_max}
               />
+              {errors.price_max && <p className="text-sm text-destructive">{errors.price_max}</p>}
             </div>
           </div>
 

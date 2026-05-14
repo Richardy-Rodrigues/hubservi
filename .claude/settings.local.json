@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(\\(Get-Content \"c:\\\\ServiceHub\\\\hubservi\\\\Engenharia\\\\Excalidraw\\\\MODELO-CANVA.excalidraw\" | Measure-Object -Line\\).Lines)"
+    ]
+  }
+}

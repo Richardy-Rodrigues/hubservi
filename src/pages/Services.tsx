@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchPublicProfilesByIds, type PublicProfileSummary } from "@/integrations/supabase/views";
+import type { Database } from "@/integrations/supabase/types";
 import { Layout } from "@/components/layout/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -33,55 +35,112 @@ export default function Services() {
   const { data: servicesData, isLoading } = useQuery({
     queryKey: ["services", search, categoryId, sort, page],
     queryFn: async () => {
-      let query = supabase
-        .from("services")
-        .select(`
-          *,
-          categories(name, icon),
-          profiles!services_provider_id_fkey(full_name, avatar_url)
-        `, { count: "exact" })
-        .eq("is_active", true);
+      const from = page * ITEMS_PER_PAGE;
+      const to = (page + 1) * ITEMS_PER_PAGE - 1;
 
-      if (search.trim()) {
-        query = query.ilike("title", `%${search.trim()}%`);
-      }
-      if (categoryId !== "all") {
-        query = query.eq("category_id", categoryId);
-      }
+      type ServiceRow = Database["public"]["Tables"]["services"]["Row"] & {
+        categories: { name: string; icon: string } | null;
+      };
+      let services: ServiceRow[] = [];
+      let total = 0;
 
       if (sort === "recent") {
-        query = query.order("created_at", { ascending: false });
+        let query = supabase
+          .from("services")
+          .select("*, categories(name, icon)", { count: "exact" })
+          .eq("is_active", true);
+
+        if (search.trim()) query = query.ilike("title", `%${search.trim()}%`);
+        if (categoryId !== "all") query = query.eq("category_id", categoryId);
+
+        const { data, error, count } = await query
+          .order("created_at", { ascending: false })
+          .range(from, to);
+        if (error) throw error;
+        services = data ?? [];
+        total = count ?? 0;
       } else {
-        query = query.order("created_at", { ascending: false });
+        // sort by rating or popularity: rank via service_stats first so that
+        // pagination respects global order, not page-local in-memory sort.
+        const statsOrderColumn = sort === "rating" ? "average_rating" : "review_count";
+
+        let candidates = supabase
+          .from("services")
+          .select("id", { count: "exact" })
+          .eq("is_active", true);
+        if (search.trim()) candidates = candidates.ilike("title", `%${search.trim()}%`);
+        if (categoryId !== "all") candidates = candidates.eq("category_id", categoryId);
+
+        const { data: candidateRows, count, error: candidatesError } = await candidates;
+        if (candidatesError) throw candidatesError;
+        total = count ?? 0;
+        const candidateIds = (candidateRows ?? []).map((r) => r.id as string);
+        if (candidateIds.length === 0) {
+          return { services: [], total: 0 };
+        }
+
+        const { data: rankedStats, error: rankedError } = await supabase
+          .from("service_stats")
+          .select("service_id, average_rating, review_count")
+          .in("service_id", candidateIds)
+          .order(statsOrderColumn, { ascending: false, nullsFirst: false })
+          .range(from, to);
+        if (rankedError) throw rankedError;
+
+        const orderedIds = (rankedStats ?? [])
+          .map((r) => r.service_id as string | null)
+          .filter((id): id is string => !!id);
+        if (orderedIds.length === 0) {
+          return { services: [], total };
+        }
+
+        const { data: servicesData, error: servicesError } = await supabase
+          .from("services")
+          .select("*, categories(name, icon)")
+          .in("id", orderedIds);
+        if (servicesError) throw servicesError;
+
+        const byId = new Map((servicesData ?? []).map((s) => [s.id, s]));
+        services = orderedIds
+          .map((id) => byId.get(id))
+          .filter((s): s is NonNullable<typeof s> => !!s);
       }
 
-      query = query.range(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE - 1);
+      const serviceIds = services.map((s) => s.id);
+      const providerIds = Array.from(new Set(services.map((s) => s.provider_id)));
 
-      const { data, error, count } = await query;
-      if (error) throw error;
+      const statsMap: Record<string, { average_rating: number; review_count: number }> = {};
+      const providerMap: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
 
-      const serviceIds = (data || []).map((s) => s.id);
-      let statsMap: Record<string, { average_rating: number; review_count: number }> = {};
       if (serviceIds.length > 0) {
         const { data: statsData } = await supabase
           .from("service_stats")
           .select("service_id, average_rating, review_count")
           .in("service_id", serviceIds);
-        if (statsData) {
-          statsData.forEach((s) => {
-            if (s.service_id) statsMap[s.service_id] = { average_rating: s.average_rating ?? 0, review_count: s.review_count ?? 0 };
-          });
-        }
+        statsData?.forEach((s) => {
+          if (s.service_id) {
+            statsMap[s.service_id] = {
+              average_rating: s.average_rating ?? 0,
+              review_count: s.review_count ?? 0,
+            };
+          }
+        });
       }
 
-      let sorted = (data || []).map((s) => ({ ...s, stats: statsMap[s.id] || null }));
-      if (sort === "rating") {
-        sorted = [...sorted].sort((a, b) => (b.stats?.average_rating ?? 0) - (a.stats?.average_rating ?? 0));
-      } else if (sort === "popular") {
-        sorted = [...sorted].sort((a, b) => (b.stats?.review_count ?? 0) - (a.stats?.review_count ?? 0));
+      if (providerIds.length > 0) {
+        const providerRows = await fetchPublicProfilesByIds(providerIds);
+        providerRows.forEach((p: PublicProfileSummary) => {
+          providerMap[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url };
+        });
       }
 
-      return { services: sorted, total: count ?? 0 };
+      const enriched = services.map((s) => ({
+        ...s,
+        stats: statsMap[s.id] || null,
+        provider: providerMap[s.provider_id] || null,
+      }));
+
+      return { services: enriched, total };
     },
   });
 
@@ -196,7 +255,7 @@ export default function Services() {
                           )}
                         </div>
                         <p className="mt-3 text-xs text-muted-foreground">
-                          por {service.profiles?.full_name || "Profissional"}
+                          por {service.provider?.full_name || "Profissional"}
                         </p>
                       </CardContent>
                     </Card>
