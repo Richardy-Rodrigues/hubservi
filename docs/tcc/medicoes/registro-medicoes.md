@@ -155,3 +155,26 @@ Evidência: `eslint-report.json` (atual), `eslint-sonarjs-report.json` (recomend
 - **Modularização (M-03/M-23/M-24).** Zero ciclos, confirmado por **duas ferramentas independentes**. O grafo de dependências é saudável: o núcleo (`lib`, `contexts`, `integrations`) tem baixa instabilidade (é depended-upon e estável), enquanto `pages` e `dashboards` têm alta instabilidade (folhas que dependem de muitos e são dependidas por poucos) — exatamente o padrão esperado pelo princípio das dependências estáveis.
 
 **Síntese da categoria Manutenibilidade.** Estrutura modular **sólida** (0 ciclos, acoplamento saudável); higiene de código **abaixo do ideal** (lint não zerado, agravado por regras desligadas; duplicação acima de 3% na UI, com culpado identificado). O veredito é misto e específico, com dois alvos de ação claros: (i) ligar as regras de *lint* recomendadas e tratar os `any`/complexidade; (ii) desduplicar os dois *dashboards*.
+
+## Semana 4 — Segurança externa (SCA + advisors do banco)
+
+Complementa a segurança já verificada por RLS (§5.2.1, testes de integração) com a análise das dependências e do schema.
+
+| ID | Cenário (§5.2.1) | Métrica | Critério | Ferramenta | Data | Valor | Veredito |
+|----|------------------|---------|----------|------------|------|-------|----------|
+| M-25 | Vulnerabilidades em dependências | Nº de CVEs por severidade | 0 alta/crítica não tratadas | npm audit (substitui Snyk) | 2026-07-16 | **12 altas, 8 moderadas, 0 críticas** | **Não atende** (ver ressalva) |
+| M-26 | Integridade do schema/funções | Erros de *lint* de schema | 0 | supabase db lint | 2026-07-16 | **0 erros** | **Atende** |
+
+Evidência: `evidencias/2026-07-16/npm-audit.json`, `supabase-db-lint.txt`.
+
+**Substituição de ferramenta registrada.** O plano nomeia o **Snyk** para SCA; ele exige conta/autenticação, indisponível no ambiente. Usou-se o **`npm audit`** (mesma classe — *Software Composition Analysis* sobre o *lockfile*), viabilizado pela consolidação do `package-lock.json` como único *lockfile* (achado da Semana 1). A substituição é análoga à do k6→autocannon.
+
+**Ressalva crítica na leitura dos CVEs (produção vs. build).** Os 12 CVEs de severidade alta não são equivalentes em risco real:
+- **11 dos 12 estão em ferramentas de build/desenvolvimento** — `vite`, `rollup`, `ws`, `glob`, `minimatch`, `picomatch`, `lodash`, `flatted`, `eslint-plugin-sonarjs` — que executam apenas em tempo de build/teste e **não têm superfície de ataque em produção** (não são servidas ao usuário).
+- **1 é de produção:** `react-router-dom` (e seus transitivos `react-router`/`@remix-run/router`) — *XSS via open redirect* / redirecionamento externo por caminho não confiável. **Este é o único que merece prioridade**, por rodar no navegador do usuário; há correção por atualização de versão.
+
+Reportar "12 altas" sem essa distinção seria alarmista; ignorá-las, negligente. A avaliação separa o CVE que expõe o usuário (react-router-dom) dos que só afetam o ambiente de build — e recomenda a atualização dirigida do primeiro. A maioria possui *fix* disponível via `npm audit fix`, cuja aplicação (com verificação de regressão) fica como recomendação para não introduzir quebras não testadas nesta fase.
+
+**DAST (varredura dinâmica) — pendência registrada.** O plano prevê OWASP ZAP. Optou-se por **não** executá-lo contra o `vite preview` local, porque o *baseline* mediria os cabeçalhos do servidor de preview — não do host de produção (que define CSP, HSTS, etc.) —, resultado não representativo. Numa arquitetura SPA + BaaS sem SSR, a superfície de ataque relevante é a **API do serviço gerenciado**, já coberta com profundidade pela suíte de RLS/triggers (M-06…M-13). O DAST fica como **pendência a executar contra a URL de produção** quando houver *deploy*, registrando-se aqui a decisão e sua justificativa.
+
+**Síntese da categoria Segurança.** Autorização no banco (RLS/triggers): **atende** após correção dos furos F-02/F-03 (0 acessos indevidos nos cenários testados). Dependências: **1 CVE de produção** a tratar (react-router-dom), demais de build. Schema: **limpo**. DAST: pendente contra produção. O núcleo da segurança de uma arquitetura BaaS — a autorização declarativa — está verificado e verde; o resíduo é um *upgrade* de dependência dirigido e uma varredura que depende de ambiente de produção.

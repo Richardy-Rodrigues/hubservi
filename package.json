@@ -26,6 +26,7 @@
     "load:run": "node tests/load/load-services.mjs load",
     "measure:lint": "eslint . -f json -o docs/tcc/medicoes/evidencias/latest/eslint-report.json",
     "measure:cycles": "madge --circular --extensions ts,tsx src/",
+    "measure:sca": "npm audit --json",
     "measure:smells": "eslint --config eslint.measure.config.js src",
     "measure:dup": "jscpd src --ignore \"src/components/ui/**,src/integrations/supabase/types.ts,**/__tests__/**,src/test/**\" --format typescript,tsx --min-lines 5 --min-tokens 50"
   },

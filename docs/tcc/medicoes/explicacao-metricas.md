@@ -183,3 +183,19 @@ Os dois furos seguem o mesmo ciclo, e é ele que dá credibilidade ao trabalho: 
 **A frase da defesa:** "Manutenibilidade não é uma nota, é um diagnóstico. A arquitetura não tem dependências circulares e tem um núcleo estável — isso é sólido. Já a higiene do código está abaixo do ideal, e conseguimos apontar exatamente onde: regras de verificação desligadas e duas telas que se repetem em 61 linhas. Medir serviu para transformar 'o código é mais ou menos' em uma lista de ações concretas."
 
 *Histórico:* ESLint 19 (atual) → 25+4 (recomendada, com sonarjs); duplicação TSX 4,55%; 0 ciclos (madge + dependency-cruiser); 16/07/2026.
+
+---
+
+## Segurança externa (Semana 4) — as bibliotecas de terceiros
+
+**O que medimos.** Todo sistema moderno é montado sobre dezenas de bibliotecas de terceiros — e vulnerabilidades nelas viram vulnerabilidades do sistema. Uma ferramenta de análise varre todas as dependências em busca de falhas conhecidas.
+
+**O resultado — e por que o número cru engana.** A varredura acusou **12 vulnerabilidades de severidade alta**. Parece grave, mas a leitura honesta exige uma distinção que a maioria dos relatórios ignora: **11 delas estão em ferramentas que só rodam na hora de programar e compilar** (o empacotador, o servidor de desenvolvimento, utilitários de teste) — elas nunca chegam ao usuário final, então não são um risco em produção. **Apenas uma é de verdade preocupante:** a biblioteca de navegação entre telas (`react-router-dom`), com uma falha que poderia permitir redirecionar o usuário para um site malicioso. Essa roda no navegador do usuário e tem prioridade — e tem correção disponível.
+
+**A lição de método.** Separar "12 vulnerabilidades altas" em "1 que importa em produção + 11 de ferramenta de build" é exatamente o valor de uma avaliação técnica. O número cru assustaria; a análise transforma-o em uma única ação concreta: atualizar a biblioteca de navegação.
+
+**O que ficou de fora, e por quê.** Havia um segundo tipo de teste de segurança previsto (uma varredura dinâmica, o "ZAP"), que simula ataques ao site em execução. Decidimos não rodá-lo agora porque, sem o sistema publicado num servidor de produção, ele mediria o ambiente de teste local — um resultado não representativo. Registramos como pendência: essa varredura faz sentido contra o site já publicado. O coração da segurança desta arquitetura — quem pode acessar quais dados, testado via RLS — já foi verificado a fundo.
+
+**A frase da defesa:** "A varredura de dependências achou 12 vulnerabilidades altas, mas a avaliação não para no número: 11 são de ferramentas de desenvolvimento que não chegam ao usuário, e só uma — a biblioteca de navegação — é um risco real de produção, com correção conhecida. Medir é fácil; interpretar o que o número significa para o risco real é o trabalho."
+
+*Histórico:* npm audit (substituindo Snyk) — 12 altas/8 moderadas/0 críticas, sendo 1 de produção (react-router-dom); supabase db lint limpo; DAST pendente para produção; 16/07/2026.
