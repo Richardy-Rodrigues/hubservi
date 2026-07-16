@@ -165,3 +165,21 @@ Os dois furos seguem o mesmo ciclo, e é ele que dá credibilidade ao trabalho: 
 **A frase da defesa:** "Medir os dois lados do desempenho nos permitiu localizar o gargalo: a API responde em 253ms sob carga, mas a página leva 3,2s para abrir. O problema não é o banco nem a arquitetura de dados — é o peso do frontend. Sem medir os dois, teríamos culpado o lado errado."
 
 *Histórico:* autocannon 8 (substituindo k6); carga 30 conexões/20s → p95 253ms, 0 erros, ~2221 req/s (16/07/2026).
+
+---
+
+## Manutenibilidade (Semana 7) — quão fácil é manter e evoluir o código
+
+**O que medimos.** Não o que o sistema faz, mas quão saudável é o código por dentro — três perguntas: o código está limpo? há trechos copiados e colados? a arquitetura tem "nós" que dificultam mudanças?
+
+**Código limpo — abaixo do ideal, e medimos duas vezes.** A ferramenta de análise (ESLint) acusa 19 problemas com a configuração atual do projeto. Mas descobrimos algo importante: **a configuração atual tem verificações desligadas**. Ao medir com a configuração recomendada, o número sobe para **25 problemas**, incluindo 4 funções complexas demais e vários "vícios" que a configuração atual escondia. Reportamos os dois números — porque mostrar só o menor seria enganoso.
+
+**Código copiado — um alvo claro.** A duplicação de código na camada visual ficou em **4,55%**, acima do limite de 3%. E a causa tem nome: **as duas telas de painel (do cliente e do prestador) compartilham 61 linhas quase idênticas**. É uma recomendação concreta de refatoração — juntar o que é comum às duas telas.
+
+**Arquitetura — o ponto forte.** Aqui o resultado é bom, e confirmado por duas ferramentas independentes: **zero "dependências circulares"** (situações em que A precisa de B que precisa de A, que travam manutenção). Além disso, o "miolo" do sistema (as bibliotecas base) é estável e as telas são a parte que muda — exatamente a organização que se espera de um código bem estruturado.
+
+**O veredito é misto, e é isso que o torna útil.** A estrutura da arquitetura é sólida; a higiene do código está abaixo do ideal, com dois alvos de ação nomeados. Uma nota única ("bom" ou "ruim") não ajudaria ninguém; dizer *o que* está bom (a modularização) e *o que* corrigir (ligar as regras de lint, desduplicar os painéis) é o que uma avaliação entrega.
+
+**A frase da defesa:** "Manutenibilidade não é uma nota, é um diagnóstico. A arquitetura não tem dependências circulares e tem um núcleo estável — isso é sólido. Já a higiene do código está abaixo do ideal, e conseguimos apontar exatamente onde: regras de verificação desligadas e duas telas que se repetem em 61 linhas. Medir serviu para transformar 'o código é mais ou menos' em uma lista de ações concretas."
+
+*Histórico:* ESLint 19 (atual) → 25+4 (recomendada, com sonarjs); duplicação TSX 4,55%; 0 ciclos (madge + dependency-cruiser); 16/07/2026.

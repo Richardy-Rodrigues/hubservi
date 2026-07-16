@@ -133,3 +133,25 @@ Evidência: `evidencias/2026-07-16/autocannon-smoke.json` e `autocannon-load.jso
 **Ameaça à validade (§5.4).** A medição corre contra o **stack Supabase local** (ambiente controlado, sem latência de rede real nem limites de plano gerenciado). O resultado é um **piso de desempenho da camada de dados** — a API responde à listagem com folga sob concorrência. Uma medição contra a instância gerenciada (rede + *rate limits* do *free tier*) tende a apresentar p95 maior; essa diferença é declarada como limite de validade externa. O contraste entre a API rápida (leitura p95 253 ms) e o carregamento inicial lento da SPA (LCP 3,17 s) localiza o gargalo de desempenho no **frontend (bundle)**, não no backend — insumo direto para a análise da Seção 7.
 
 **Síntese da categoria Desempenho.** Backend sob carga: **atende** (p95 e erro dentro do critério). Frontend (carregamento inicial): **não atende** (LCP/score abaixo da meta mesmo após *code-splitting*). A avaliação, portanto, não emite um veredito único para "desempenho": distingue a camada que cumpre o requisito da que não cumpre — que é o tipo de resolução que uma avaliação técnica deve oferecer.
+
+## Semana 7 — Manutenibilidade (análise estática local)
+
+Ferramentas locais, sem dependência de serviço externo: **ESLint** (estilo/antipadrões), **eslint-plugin-sonarjs 3** (*code smells* + complexidade cognitiva), regra `complexity` (ciclomática), **jscpd 4** (duplicação) e **Madge + dependency-cruiser** (ciclos e acoplamento). Todas as medições excluem `src/components/ui/**` (shadcn vendorizado) e `types.ts` (gerado).
+
+| ID | Cenário (§5.2.4) | Métrica | Critério | Ferramenta | Data | Valor | Veredito |
+|----|------------------|---------|----------|------------|------|-------|----------|
+| M-02 | Conformidade de estilo (config atual) | Violações de *lint* | Tendência a 0 | ESLint 9 | 2026-07-15 | **19 erros**, 9 avisos | **Não atende** |
+| M-21 | *Code smells* e complexidade (config recomendada) | Violações adicionais | (2º ponto de dado) | ESLint + sonarjs 3 | 2026-07-16 | **25 erros + 4 avisos** (16 `no-explicit-any`, 4 `complexity>15`, *smells* sonarjs) | **Não atende** |
+| M-22 | Duplicação de código | % de linhas duplicadas | ≤ 3% | jscpd 4 | 2026-07-16 | **TSX 4,55%** (agregado ts+tsx ~3,0%) | **Não atende** (camada UI) |
+| M-03 | Modularização (ciclos) | Nº de dependências circulares | 0 | Madge 8 | 2026-07-15 | **0** | **Atende** |
+| M-23 | Modularização (ciclos, 2ª ferramenta) | Nº de dependências circulares | 0 | dependency-cruiser 16 | 2026-07-16 | **0** (93 módulos, 0 violações) | **Atende** |
+| M-24 | Acoplamento e estabilidade | Instabilidade por camada | (observacional) | dependency-cruiser 16 | 2026-07-16 | Núcleo estável, folhas voláteis | **Saudável** |
+
+Evidência: `eslint-report.json` (atual), `eslint-sonarjs-report.json` (recomendada), `jscpd/jscpd-report.json`, `depcruise-metrics.txt`.
+
+**Leitura dos resultados.**
+- **Lint (M-02/M-21).** A configuração atual do projeto tem `no-unused-vars` desligado e o TypeScript não é *strict* — por isso "19 erros" **subestima** o débito. A configuração recomendada acusa **25 erros + 4 avisos**, revelando 6 *code smells* que a config atual esconde (condicionais aninhados, *dead store*, complexidade cognitiva, imports não usados) e **4 funções com complexidade ciclomática > 15**. Reportar os dois pontos de dado é análise; reportar só o primeiro seria subcontagem.
+- **Duplicação (M-22).** No agregado fica na fronteira (~3,0%), mas a **camada de UI (TSX) tem 4,55%**, acima da meta. A causa é localizada e nomeável: **`ClientDashboard.tsx` e `ProviderDashboard.tsx` compartilham 61 linhas quase idênticas** — os dois maiores clones. É um alvo de refatoração concreto (extrair um componente/hook de painel comum), registrado como recomendação.
+- **Modularização (M-03/M-23/M-24).** Zero ciclos, confirmado por **duas ferramentas independentes**. O grafo de dependências é saudável: o núcleo (`lib`, `contexts`, `integrations`) tem baixa instabilidade (é depended-upon e estável), enquanto `pages` e `dashboards` têm alta instabilidade (folhas que dependem de muitos e são dependidas por poucos) — exatamente o padrão esperado pelo princípio das dependências estáveis.
+
+**Síntese da categoria Manutenibilidade.** Estrutura modular **sólida** (0 ciclos, acoplamento saudável); higiene de código **abaixo do ideal** (lint não zerado, agravado por regras desligadas; duplicação acima de 3% na UI, com culpado identificado). O veredito é misto e específico, com dois alvos de ação claros: (i) ligar as regras de *lint* recomendadas e tratar os `any`/complexidade; (ii) desduplicar os dois *dashboards*.
