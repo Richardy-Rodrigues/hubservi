@@ -1,0 +1,24 @@
+﻿AMBIENTE DE MEDICAO
+Data da coleta: 2026-07-15
+Commit (HEAD): ad89e6c4eb9e1fc7928407be84789ba2f055e066
+Branch: main
+Arvore de trabalho limpa: NAO (ver nota em registro-medicoes.md)
+
+SISTEMA
+OS: Microsoft Windows 11 Pro for Workstations build 26200
+CPU: AMD Ryzen 5 PRO 230 w/ Radeon 760M Graphics    
+RAM (GB): 15.2
+
+RUNTIME
+node: v24.14.0
+npm: 11.9.0
+gerenciador de pacotes declarado: npm@11.9.0 (package.json packageManager)
+
+FERRAMENTAS DE MEDICAO
+vitest: ^3.2.4
+@vitest/coverage-v8: ^3.2.7
+eslint: ^9.32.0
+typescript-eslint: ^8.38.0
+madge: ^8.0.0
+dependency-cruiser: ^16.10.4
+jsdom: ^26.1.0

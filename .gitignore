@@ -6,6 +6,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+# Excecao: logs de teste sao evidencia citada pelo TCC e devem ser versionados.
+!docs/tcc/medicoes/evidencias/**/*.log
 
 node_modules
 dist
