@@ -1,0 +1,19 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mC:/ServiceHub/hubservi[39m
+
+ [32m✓[39m tests/integration/rls-bookings.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 1018[2mms[22m[39m
+ [32m✓[39m tests/integration/rls-services.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 937[2mms[22m[39m
+ [32m✓[39m tests/integration/rls-reviews.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 591[2mms[22m[39m
+ [32m✓[39m tests/integration/rls-pii.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 526[2mms[22m[39m
+ [32m✓[39m tests/integration/rls-user-type.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 509[2mms[22m[39m
+ [32m✓[39m tests/integration/flow-happy-path.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 494[2mms[22m[39m
+   [33m[2m✓[22m[39m fluxo feliz — ciclo completo de contratacao e avaliacao[2m > [22mprestador publica servico, cliente contrata, prestador conclui, cliente avalia [33m 372[2mms[22m[39m
+ [32m✓[39m tests/integration/smoke.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 358[2mms[22m[39m
+ [32m✓[39m tests/integration/trigger-booking-status.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 312[2mms[22m[39m
+ [32m✓[39m tests/integration/integrity-cascade.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 204[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m      Tests [22m [1m[32m30 passed[39m[22m[90m (30)[39m
+[2m   Start at [22m 11:53:25
+[2m   Duration [22m 7.88s[2m (transform 89ms, setup 479ms, collect 194ms, tests 4.95s, environment 1ms, prepare 644ms)[22m
+

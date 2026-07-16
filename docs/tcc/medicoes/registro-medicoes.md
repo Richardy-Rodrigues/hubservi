@@ -57,3 +57,20 @@ Aplicação do ciclo **medir → detectar → corrigir → re-medir** aos dois f
 **Cobertura de cenários (7 testes de integração de segurança, todos verdes após correção):** além dos dois furos, 5 controles asseguram que o comportamento legítimo permanece — anônimo não lê `profiles`; usuário lê o próprio perfil; `public_profiles` não expõe PII; review com prestador correto e *booking* concluído é aceita; review sem *booking* concluído é rejeitada.
 
 > **Nota metodológica.** O par antes/depois é o resultado, não o painel verde final. Os arquivos `rls-furos-ANTES.log` (2 falhas, 5 controles verdes) e `rls-furos-DEPOIS.log` (11 verdes) documentam que o instrumento efetivamente reprova o sistema vulnerável — condição sem a qual um resultado favorável nada demonstraria.
+
+## Semana 3 — suíte completa de RLS/triggers (Segurança + Confiabilidade)
+
+Além dos dois furos, a suíte cobre os demais cenários de autorização (§5.2.1) e confiabilidade (§5.2.5), todos verificados contra a API real (PostgREST) com clientes autenticados por papel. **30 testes em 9 arquivos, todos verdes** após as correções — evidência em `evidencias/2026-07-16/suite-integracao-completa.log`.
+
+| ID | Atributo | Cenário | Métrica / critério | Arquivo de teste | Data | Veredito |
+|----|----------|---------|--------------------|------------------|------|----------|
+| M-06 | Segurança | Escalonamento de privilégio (`user_type` client→provider) | 100% bloqueadas | `rls-user-type.test.ts` | 2026-07-16 | **Atende** |
+| M-07 | Segurança | Isolamento de serviços por prestador (criar/editar de terceiros) | 0 acessos indevidos | `rls-services.test.ts` | 2026-07-16 | **Atende** |
+| M-08 | Segurança | Isolamento de bookings + cancelamento restrito ao próprio pendente | 0 acessos indevidos | `rls-bookings.test.ts` | 2026-07-16 | **Atende** |
+| M-09 | Segurança | Exposição de PII a anônimo e autenticado (F-02) | 0 campos expostos | `rls-pii.test.ts` | 2026-07-16 | **Atende** (após correção) |
+| M-10 | Segurança | Review atribuída ao prestador correto + só após booking concluído (F-03) | tentativa indevida bloqueada | `rls-reviews.test.ts` | 2026-07-16 | **Atende** (após correção) |
+| M-11 | Confiabilidade | Máquina de estados do booking (transições inválidas) | 0 transições inválidas aceitas | `trigger-booking-status.test.ts` | 2026-07-16 | **Atende** |
+| M-12 | Confiabilidade | Integridade referencial em exclusão de serviço | 0 registros órfãos | `integrity-cascade.test.ts` | 2026-07-16 | **Atende** |
+| M-13 | Confiabilidade | Fluxo crítico ponta a ponta (auth→service→booking→review) | 100% sucesso no caso válido | `flow-happy-path.test.ts` | 2026-07-16 | **Atende** |
+
+Cada cenário inclui tanto o caso indevido (que deve ser barrado) quanto o controle legítimo (que deve funcionar), evitando o falso-verde de um teste que passa por nunca exercitar o caminho real. Com isto, os cenários de **segurança** (§5.2.1) e **confiabilidade** (§5.2.5) do plano estão cobertos por testes automatizados reprodutíveis; os itens de segurança externos (ZAP, Snyk) e de desempenho seguem para as semanas 4 e 6.
