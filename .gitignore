@@ -12,6 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Relatorios de cobertura (gerados). As evidencias citadas pelo TCC ficam
+# versionadas em docs/tcc/medicoes/evidencias/.
+coverage
+
+# Supabase local (stack de testes). config.toml, migrations e seed.sql SAO
+# versionados; artefatos temporarios do stack local, nao.
+supabase/.branches
+supabase/.temp
+supabase/.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -24,3 +34,5 @@ dist-ssr
 *.sw?
 
 /Engenharia
+
+*.env
