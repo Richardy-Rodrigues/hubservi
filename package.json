@@ -21,6 +21,9 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:status": "supabase status",
+    "load:seed": "node tests/load/seed-load.mjs",
+    "load:smoke": "node tests/load/load-services.mjs smoke",
+    "load:run": "node tests/load/load-services.mjs load",
     "measure:lint": "eslint . -f json -o docs/tcc/medicoes/evidencias/latest/eslint-report.json",
     "measure:cycles": "madge --circular --extensions ts,tsx src/"
   },
@@ -87,6 +90,7 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react-swc": "^3.11.0",
     "@vitest/coverage-v8": "^3.2.7",
+    "autocannon": "^8.0.0",
     "autoprefixer": "^10.4.21",
     "dependency-cruiser": "^16.10.4",
     "eslint": "^9.32.0",

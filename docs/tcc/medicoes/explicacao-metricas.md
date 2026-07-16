@@ -150,4 +150,18 @@ Os dois furos seguem o mesmo ciclo, e é ele que dá credibilidade ao trabalho: 
 
 **A frase da defesa:** "O desempenho foi o único atributo que não atingiu a meta, e esse é um resultado tão legítimo quanto os demais. Medimos 85 pontos, diagnosticamos a causa — um pacote único de 679 KB —, dividimos o código e subimos para 88, documentando exatamente o que ainda separa o sistema da meta. A avaliação não existe para aprovar o sistema; existe para dizer a verdade sobre ele."
 
-*Histórico:* Lighthouse 12.8.2, mediana de 3 execuções; score 85→88, LCP 3,49s→3,17s após code-splitting (16/07/2026). Teste de carga (k6) pendente de decisão de ferramenta.
+*Histórico:* Lighthouse 12.8.2, mediana de 3 execuções; score 85→88, LCP 3,49s→3,17s após code-splitting (16/07/2026).
+
+### Desempenho sob carga — o backend aguenta bem
+
+**O que medimos.** Enquanto o Lighthouse mede a *abertura* da página, o teste de carga mede o *backend*: quantas consultas de listagem de serviços a API aguenta ao mesmo tempo, e quão rápido responde sob pressão. Simulamos 30 usuários simultâneos por 20 segundos.
+
+**O resultado — atende com folga.** A API respondeu a **44 mil requisições** com **zero erros**, a uma velocidade de ~2.200 por segundo, e o tempo de resposta no percentil 95 (ou seja, 95% das respostas foram mais rápidas que isso) ficou em **253 milissegundos** — bem abaixo do limite de 800ms que definimos. 
+
+**A leitura conjunta é o achado interessante.** Juntando as duas medições de desempenho: a **API é rápida** (253ms sob carga), mas a **página é lenta para abrir** (3,2s). Isso aponta o dedo com precisão para onde está o problema de desempenho — **no frontend**, no tamanho do pacote JavaScript, e **não no backend**. Uma avaliação que só olhasse um dos lados chegaria à conclusão errada.
+
+**Observação honesta de método.** Esse teste rodou contra o ambiente local, sem a latência de rede e os limites do plano gratuito que existiriam em produção — então o número real em produção seria um pouco maior. Registramos isso como um limite da medição, em vez de apresentá-la como se fosse a realidade de produção. E anotamos a troca de ferramenta (usamos autocannon no lugar do k6, que não estava disponível — ambos fazem a mesma coisa).
+
+**A frase da defesa:** "Medir os dois lados do desempenho nos permitiu localizar o gargalo: a API responde em 253ms sob carga, mas a página leva 3,2s para abrir. O problema não é o banco nem a arquitetura de dados — é o peso do frontend. Sem medir os dois, teríamos culpado o lado errado."
+
+*Histórico:* autocannon 8 (substituindo k6); carga 30 conexões/20s → p95 253ms, 0 erros, ~2221 req/s (16/07/2026).

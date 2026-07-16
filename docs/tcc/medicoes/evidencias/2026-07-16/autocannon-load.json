@@ -1,0 +1,14 @@
+{
+  "mode": "load",
+  "connections": 30,
+  "duration_s": 20,
+  "requests_total": 44413,
+  "rps_mean": 2221.1,
+  "latency_p50_ms": 103,
+  "latency_p95_ms": 253,
+  "latency_p99_ms": 287,
+  "latency_max_ms": 418,
+  "non2xx": 0,
+  "errors": 0,
+  "timeouts": 0
+}

@@ -116,4 +116,20 @@ Evidência: `evidencias/2026-07-16/lighthouse-{1,2,3}.json` (antes), `lighthouse
 
 **Conclusão honesta.** O critério de desempenho **não é atendido** no estágio atual, mesmo após a otimização. O ganho do *code-splitting* é real mas parcial: o *chunk* de entrada (489 KB, dominado por React + Radix/shadcn) continua sendo o fator limitante do LCP sob *throttling* mobile. Fecha-se o ciclo com uma **recomendação registrada** — separação de *vendor chunks*, avaliação de biblioteca de gráficos mais leve e *preload* do recurso de LCP — cuja execução excede o escopo desta fase. Reportar a deficiência e quantificar o resíduo é resultado de avaliação; mascará-lo não seria.
 
-> **Pendente nesta categoria:** teste de carga (p95, vazão, taxa de erro) sobre a API — a ferramenta k6 nomeada no plano não está instalada no ambiente; a decisão de instalá-la ou substituí-la (ex.: autocannon) está em aberto. Ver seção de desempenho sob carga (a preencher).
+### Semana 6 — Desempenho sob carga (listagem de serviços)
+
+Teste de carga do endpoint público de listagem de serviços ativos (PostgREST), exercitado como o cliente anônimo o faria. **Substituição de ferramenta registrada:** o plano (§5.2.2) nomeia o k6, não disponível no ambiente; usou-se **autocannon 8** (também um *HTTP load tester*), que entrega as mesmas métricas (p95, vazão, taxa de erro). A substituição é análoga à já prevista para o JMeter e não altera a natureza do cenário.
+
+**Definição do limiar de p95 (que o plano deixava "a definir").** Calibrou-se a partir do *baseline* observado: um *smoke run* (5 conexões/5 s) registrou p95 ≈ 57 ms. Fixou-se o critério em **p95 ≤ 800 ms** para leitura — folgadamente acima do observado e abaixo do limite de 1 s da heurística de Nielsen para resposta percebida como fluida — e **taxa de erro < 1%**.
+
+| ID | Atributo | Métrica | Critério | Ferramenta | Data | Valor | Veredito |
+|----|----------|---------|----------|------------|------|-------|----------|
+| M-18 | Eficiência de desempenho | Latência p95 (leitura sob carga) | ≤ 800 ms | autocannon 8 | 2026-07-16 | **253 ms** (30 conexões, 20 s, 44.413 req) | **Atende** |
+| M-19 | Eficiência de desempenho | Taxa de erro sob carga | < 1% | autocannon 8 | 2026-07-16 | **0%** (0 non-2xx, 0 timeouts) | **Atende** |
+| M-20 | Eficiência de desempenho | Vazão | (observacional) | autocannon 8 | 2026-07-16 | **≈ 2.221 req/s** | — |
+
+Evidência: `evidencias/2026-07-16/autocannon-smoke.json` e `autocannon-load.json`. Reproduzível por `npm run load:seed && npm run load:run` com o stack local de pé.
+
+**Ameaça à validade (§5.4).** A medição corre contra o **stack Supabase local** (ambiente controlado, sem latência de rede real nem limites de plano gerenciado). O resultado é um **piso de desempenho da camada de dados** — a API responde à listagem com folga sob concorrência. Uma medição contra a instância gerenciada (rede + *rate limits* do *free tier*) tende a apresentar p95 maior; essa diferença é declarada como limite de validade externa. O contraste entre a API rápida (leitura p95 253 ms) e o carregamento inicial lento da SPA (LCP 3,17 s) localiza o gargalo de desempenho no **frontend (bundle)**, não no backend — insumo direto para a análise da Seção 7.
+
+**Síntese da categoria Desempenho.** Backend sob carga: **atende** (p95 e erro dentro do critério). Frontend (carregamento inicial): **não atende** (LCP/score abaixo da meta mesmo após *code-splitting*). A avaliação, portanto, não emite um veredito único para "desempenho": distingue a camada que cumpre o requisito da que não cumpre — que é o tipo de resolução que uma avaliação técnica deve oferecer.
