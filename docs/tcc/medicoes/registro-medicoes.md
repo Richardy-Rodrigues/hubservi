@@ -11,6 +11,7 @@ Estas são as **três primeiras medições reais** do trabalho. Registram o pont
 | ID | Atributo (ISO/IEC 25010) | Cenário / métrica | Ferramenta + versão | Data | Valor | Critério | Veredito | Evidência |
 |----|--------------------------|-------------------|---------------------|------|-------|----------|----------|-----------|
 | M-01 | Manutenibilidade → testabilidade | Cobertura de linhas da suíte (global, exclusões conforme README) | Vitest 3.2.4 + coverage-v8 3.2.7 | 2026-07-15 | **18,03%** linhas / 67,9% ramos | ≥70% módulos críticos (a calibrar na Semana 5) | **Não atende** (baseline) | `evidencias/2026-07-15/coverage-summary.json` |
+| M-01b | Manutenibilidade → testabilidade | Cobertura após ampliação da suíte (Semana 5) | Vitest 3.2.7 + coverage-v8 | 2026-07-16 | **31,99%** linhas global; **módulos críticos 82–100%** | Piso global 30% + módulos críticos ≥75% | **Atende** (limiares aplicados) | `evidencias/2026-07-16/coverage-summary-semana5.json` |
 | M-02 | Manutenibilidade | Violações de *lint* (configuração atual do repositório) | ESLint 9.32 + typescript-eslint 8.38 | 2026-07-15 | **19 erros**, 9 avisos | Tendência a 0; sem erros | **Não atende** (baseline) | `evidencias/2026-07-15/eslint-report.json` |
 | M-03 | Manutenibilidade | Dependências circulares no grafo de módulos de `src/` | Madge 8.0 | 2026-07-15 | **0 ciclos** (85 arquivos) | 0 ciclos | **Atende** | `evidencias/2026-07-15/madge-circular.txt` |
 
@@ -74,3 +75,26 @@ Além dos dois furos, a suíte cobre os demais cenários de autorização (§5.2
 | M-13 | Confiabilidade | Fluxo crítico ponta a ponta (auth→service→booking→review) | 100% sucesso no caso válido | `flow-happy-path.test.ts` | 2026-07-16 | **Atende** |
 
 Cada cenário inclui tanto o caso indevido (que deve ser barrado) quanto o controle legítimo (que deve funcionar), evitando o falso-verde de um teste que passa por nunca exercitar o caminho real. Com isto, os cenários de **segurança** (§5.2.1) e **confiabilidade** (§5.2.5) do plano estão cobertos por testes automatizados reprodutíveis; os itens de segurança externos (ZAP, Snyk) e de desempenho seguem para as semanas 4 e 6.
+
+## Semana 5 — Testabilidade: ampliação da suíte unitária e definição do limiar
+
+A suíte unitária passou de **11 para 44 testes**, cobrindo os módulos que antes tinham cobertura zero: `AuthContext`, `ReviewForm`, `ProfileForm`, `views.ts`, o *reducer* de `use-toast` e os *schemas* Zod. Introduziu-se uma **factory de mock do Supabase** (`src/test/supabaseMock.ts`) — encadeável e *thenable* — que substitui os mocks ad-hoc que cada teste remontava à mão, e um `renderWithProviders` compartilhado.
+
+**Cobertura global: 18,03% → 31,99% de linhas.** O ganho concentra-se, deliberadamente, nos módulos críticos:
+
+| Módulo crítico | Cobertura (linhas) |
+|----------------|--------------------|
+| `src/lib/schemas/service.ts`, `auth.ts` | 100% |
+| `src/integrations/supabase/views.ts` | 100% |
+| `src/components/BookingDialog.tsx` | 98,6% |
+| `src/components/ProtectedRoute.tsx` | 100% |
+| `src/components/dashboard/ProfileForm.tsx` | 96,3% |
+| `src/components/ReviewForm.tsx` | 93,5% |
+| `src/components/dashboard/ServiceForm.tsx` | 82,8% |
+| `src/contexts/AuthContext.tsx` | 82,5% |
+
+**Decisão de limiar (concretiza o "≥70% a definir" do §5.2.3).** O plano de métricas deixava a meta de cobertura em aberto. Definiu-se, com o *baseline* real em mãos, um esquema de **dois níveis** em `vitest.config.ts`:
+- **Piso global de 30%**, anti-regressão — deliberadamente modesto, porque páginas e *dashboards* extensos (`ClientDashboard`, `ProviderDashboard`, `Services`, `Auth`) permanecem sem teste nesta fase e representam a maior parte das linhas não cobertas.
+- **Módulos críticos com piso ≥75%**, enumerados explicitamente. `use-toast` fica de fora do conjunto crítico: seu *reducer* (a lógica de negócio) está coberto; o restante é *plumbing* vendorizado do shadcn.
+
+A escolha é metodológica e está registrada: *definir o que é crítico* — e proteger justamente esses módulos com um limiar exigente — é mais honesto e mais útil que perseguir um número global inatingível sem antes testar código de terceiros ou telas extensas de baixa densidade lógica. Os limiares são verificados a cada `npm run test:coverage` (e no CI da Semana 8), falhando a execução se algum módulo crítico regredir.

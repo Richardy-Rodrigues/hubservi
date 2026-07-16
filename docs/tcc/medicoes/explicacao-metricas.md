@@ -117,3 +117,19 @@ Os dois furos seguem o mesmo ciclo, e é ele que dá credibilidade ao trabalho: 
 **A frase da defesa:** "Não construímos testes para confirmar que o sistema estava bom — construímos para descobrir onde estava ruim. Achamos dois vazamentos reais de segurança que a inspeção visual não pegou, mostramos exatamente como explorá-los, corrigimos e provamos a correção. Um conjunto de testes que só mostra tela verde não teria valor nenhum; o valor está em ter, primeiro, a tela vermelha."
 
 *Histórico:* F-02 e F-03 detectados e corrigidos em 16/07/2026 (migrations `20260716130000` e `20260716130100`).
+
+---
+
+## Testabilidade (Semana 5) — a cobertura saiu de 18% para 32%
+
+**O número.** A cobertura de testes subiu de **18% para 32%** das linhas do código próprio. Mas o número global conta só metade da história — o que importa é *onde* o teste está.
+
+**A estratégia — cobrir o que é crítico, não o que é fácil.** Em vez de perseguir um número global bonito, concentramos o esforço nos módulos que carregam a lógica sensível do sistema. Esses agora estão entre **82% e 100%** cobertos: o contexto de autenticação, o formulário de avaliação, o de perfil, as validações de formulário e o acesso à camada de dados. As telas grandes de listagem, que são muito código e pouca lógica de decisão, ficaram para depois — e é por isso que o número global ainda é modesto.
+
+**A decisão metodológica (boa resposta de banca).** O plano do TCC dizia "cobertura ≥70% nos módulos críticos, a definir". Nós *definimos* — e essa definição é uma contribuição em si. Estabelecemos duas travas automáticas: um piso global baixo, que só impede piorar, e um piso alto (≥75%) em cada módulo crítico, **listado nominalmente**. Se alguém, no futuro, mexer no contexto de autenticação e a cobertura dele cair, o próprio comando de teste falha. Decidir explicitamente o que merece rigor é mais honesto do que exibir uma média global que esconde os pontos frágeis.
+
+**Ganho de engenharia junto.** Criamos uma "fábrica de simulação" do banco de dados reutilizável, que substituiu o código de teste repetitivo e frágil que existia antes. Isso não muda a nota de cobertura, mas torna os próximos testes mais rápidos de escrever — um sinal de que a *testabilidade* da arquitetura, que é o atributo sob avaliação, de fato melhorou.
+
+**A frase da defesa:** "Cobertura de teste não é um número para enfeitar slide. Subimos de 18% para 32%, mas o essencial é que os módulos que decidem quem acessa o quê estão acima de 80%, com uma trava automática que impede regressão. Medimos, e depois protegemos o que medimos."
+
+*Histórico:* suíte unitária de 11 → 44 testes; cobertura global 18% → 32%; limiares aplicados em 16/07/2026.

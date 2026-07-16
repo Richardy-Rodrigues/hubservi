@@ -27,6 +27,26 @@ export default defineConfig({
         "src/test/**",
         "**/__tests__/**",
       ],
+      // Limiares (Secao 5.2.3). O global e um piso anti-regressao — deliberadamente
+      // modesto porque paginas/dashboards extensos (ClientDashboard, ProviderDashboard,
+      // Services, Auth) seguem sem teste nesta fase. O rigor esta nos MODULOS CRITICOS,
+      // enumerados explicitamente com piso >=75%: definir o que e critico e uma decisao
+      // metodologica, preferivel a um numero global inatingivel. use-toast nao entra:
+      // seu reducer (a logica) esta coberto; o restante e plumbing vendorizado do shadcn.
+      thresholds: {
+        statements: 30,
+        lines: 30,
+        functions: 45,
+        branches: 70,
+        "src/lib/schemas/**": { lines: 100, functions: 100 },
+        "src/integrations/supabase/views.ts": { lines: 90 },
+        "src/contexts/AuthContext.tsx": { lines: 78 },
+        "src/components/ReviewForm.tsx": { lines: 85 },
+        "src/components/BookingDialog.tsx": { lines: 90 },
+        "src/components/ProtectedRoute.tsx": { lines: 90 },
+        "src/components/dashboard/ServiceForm.tsx": { lines: 80 },
+        "src/components/dashboard/ProfileForm.tsx": { lines: 85 },
+      },
     },
   },
   resolve: {
