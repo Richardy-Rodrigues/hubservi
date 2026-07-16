@@ -9,19 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
-import { z } from "zod";
-
-const loginSchema = z.object({
-  email: z.string().trim().email("E-mail inválido"),
-  password: z.string().min(6, "Mínimo 6 caracteres"),
-});
-
-const registerSchema = z.object({
-  email: z.string().trim().email("E-mail inválido"),
-  password: z.string().min(6, "Mínimo 6 caracteres"),
-  fullName: z.string().trim().min(2, "Nome obrigatório"),
-  userType: z.enum(["client", "provider"]),
-});
+import { loginSchema, registerSchema } from "@/lib/schemas/auth";
 
 export default function Auth() {
   const { user } = useAuth();
