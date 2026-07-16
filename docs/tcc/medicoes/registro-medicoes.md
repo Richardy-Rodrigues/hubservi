@@ -98,3 +98,22 @@ A suíte unitária passou de **11 para 44 testes**, cobrindo os módulos que ant
 - **Módulos críticos com piso ≥75%**, enumerados explicitamente. `use-toast` fica de fora do conjunto crítico: seu *reducer* (a lógica de negócio) está coberto; o restante é *plumbing* vendorizado do shadcn.
 
 A escolha é metodológica e está registrada: *definir o que é crítico* — e proteger justamente esses módulos com um limiar exigente — é mais honesto e mais útil que perseguir um número global inatingível sem antes testar código de terceiros ou telas extensas de baixa densidade lógica. Os limiares são verificados a cada `npm run test:coverage` (e no CI da Semana 8), falhando a execução se algum módulo crítico regredir.
+
+## Semana 6 — Desempenho (Lighthouse): carregamento inicial da SPA
+
+Medição do carregamento inicial da *home* sobre o *build* de produção (`vite build` + `vite preview`), com **3 execuções e reporte da mediana** (execução única de Lighthouse tem variância alta). Lighthouse 12.8.2, perfil padrão (mobile, com *throttling* de CPU 4× e rede *slow 4G* — as condições que a meta "≥90" pressupõe).
+
+| ID | Atributo | Métrica | Critério (§5.2.2) | Data | Antes (eager) | Depois (code-split) | Veredito |
+|----|----------|---------|-------------------|------|---------------|---------------------|----------|
+| M-14 | Eficiência de desempenho | Performance score | ≥ 90 | 2026-07-16 | **85** | **88** | **Não atende** (melhorou) |
+| M-15 | Eficiência de desempenho | LCP (Largest Contentful Paint) | ≤ 2,5 s | 2026-07-16 | **3,49 s** | **3,17 s** | **Não atende** (melhorou) |
+| M-16 | Eficiência de desempenho | TBT (Total Blocking Time) | baixo | 2026-07-16 | 11 ms | **0 ms** | **Atende** |
+| M-17 | Eficiência de desempenho | CLS (Cumulative Layout Shift) | ~0 | 2026-07-16 | 0,000 | 0,000 | **Atende** |
+
+Evidência: `evidencias/2026-07-16/lighthouse-{1,2,3}.json` (antes), `lighthouse-split-{1,2,3}.json` (depois) e os resumos `lighthouse-resumo.txt` / `lighthouse-split-resumo.txt`.
+
+**Diagnóstico → correção → re-medição.** A medição inicial reprovou nos dois critérios principais (score 85 < 90; LCP 3,49 s > 2,5 s), enquanto TBT e CLS eram ótimos — apontando o gargalo para o **tempo até renderizar**, não para interatividade ou estabilidade visual. A inspeção do *build* confirmou a causa: **bundle JavaScript único de 679 KB, com todas as rotas carregadas de forma *eager*** (`src/App.tsx` sem `React.lazy`). Aplicou-se **code-splitting por rota** (a *home* permanece *eager*; as demais viram *chunks* sob demanda), reduzindo o *bundle* inicial para **489 KB** (−28%). A re-medição mostrou melhora consistente (score +3, LCP −0,32 s), porém **ainda abaixo da meta**.
+
+**Conclusão honesta.** O critério de desempenho **não é atendido** no estágio atual, mesmo após a otimização. O ganho do *code-splitting* é real mas parcial: o *chunk* de entrada (489 KB, dominado por React + Radix/shadcn) continua sendo o fator limitante do LCP sob *throttling* mobile. Fecha-se o ciclo com uma **recomendação registrada** — separação de *vendor chunks*, avaliação de biblioteca de gráficos mais leve e *preload* do recurso de LCP — cuja execução excede o escopo desta fase. Reportar a deficiência e quantificar o resíduo é resultado de avaliação; mascará-lo não seria.
+
+> **Pendente nesta categoria:** teste de carga (p95, vazão, taxa de erro) sobre a API — a ferramenta k6 nomeada no plano não está instalada no ambiente; a decisão de instalá-la ou substituí-la (ex.: autocannon) está em aberto. Ver seção de desempenho sob carga (a preencher).

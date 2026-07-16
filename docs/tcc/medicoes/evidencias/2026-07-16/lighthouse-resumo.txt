@@ -1,0 +1,6 @@
+run1: score=86 LCP=3.33s FCP=3.18s TBT=0ms CLS=0.000
+run2: score=85 LCP=3.50s FCP=3.16s TBT=11ms CLS=0.000
+run3: score=85 LCP=3.49s FCP=3.16s TBT=26ms CLS=0.000
+---
+MEDIANA: score=85 | LCP=3.49s | FCP=3.16s | TBT=11ms | CLS=0.000 | SpeedIndex=3.16s
+Lighthouse: 12.8.2

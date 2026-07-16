@@ -133,3 +133,21 @@ Os dois furos seguem o mesmo ciclo, e é ele que dá credibilidade ao trabalho: 
 **A frase da defesa:** "Cobertura de teste não é um número para enfeitar slide. Subimos de 18% para 32%, mas o essencial é que os módulos que decidem quem acessa o quê estão acima de 80%, com uma trava automática que impede regressão. Medimos, e depois protegemos o que medimos."
 
 *Histórico:* suíte unitária de 11 → 44 testes; cobertura global 18% → 32%; limiares aplicados em 16/07/2026.
+
+---
+
+## Desempenho (Semana 6) — a página é lenta para abrir, e medimos o porquê
+
+**O que medimos.** Quão rápido a aplicação abre para o usuário, usando o Lighthouse (a ferramenta do Google) sobre a versão de produção. Rodamos três vezes e reportamos a mediana, porque uma medição única varia demais para ser citada.
+
+**O resultado — não atende, e tudo bem admitir.** A nota de desempenho ficou em **85 de 100** (meta: ≥90) e o tempo até o conteúdo principal aparecer (LCP) em **3,5 segundos** (meta: ≤2,5s). Dois indicadores, por outro lado, foram perfeitos: a página não "trava" durante o carregamento e não tem saltos de layout. Isso localizou o problema com precisão: **não é o funcionamento, é o tempo de abrir**.
+
+**A causa.** Toda a aplicação era entregue ao navegador num único arquivo de **679 KB**, com todas as telas empacotadas juntas — o usuário baixava o app inteiro só para ver a página inicial.
+
+**A correção — e a re-medição.** Dividimos o código por tela ("code-splitting"): a página inicial carrega só o essencial, e as demais telas são baixadas sob demanda. O arquivo inicial caiu para **489 KB (−28%)** e a nota subiu para **88**, com o LCP em **3,2s**. Melhorou de forma mensurável — **mas ainda não atinge a meta**.
+
+**A conclusão honesta (e a força dela).** O desempenho continua abaixo do alvo mesmo depois da otimização. Em vez de esconder isso, registramos: o que sobra do arquivo inicial é a própria base de React e a biblioteca de componentes visuais, e reduzi-la mais exige um trabalho de otimização que fica como recomendação. **Uma avaliação técnica séria mede, corrige o que consegue, e reporta com números o que ainda falta** — não fabrica uma tela verde.
+
+**A frase da defesa:** "O desempenho foi o único atributo que não atingiu a meta, e esse é um resultado tão legítimo quanto os demais. Medimos 85 pontos, diagnosticamos a causa — um pacote único de 679 KB —, dividimos o código e subimos para 88, documentando exatamente o que ainda separa o sistema da meta. A avaliação não existe para aprovar o sistema; existe para dizer a verdade sobre ele."
+
+*Histórico:* Lighthouse 12.8.2, mediana de 3 execuções; score 85→88, LCP 3,49s→3,17s após code-splitting (16/07/2026). Teste de carga (k6) pendente de decisão de ferramenta.

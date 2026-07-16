@@ -1,0 +1,5 @@
+run1: score=87 LCP=3.26s FCP=3.11s TBT=0ms
+run2: score=88 LCP=3.17s FCP=3.02s TBT=0ms
+run3: score=88 LCP=3.16s FCP=3.01s TBT=0ms
+--- DEPOIS do code-split ---
+MEDIANA: score=88 | LCP=3.17s | FCP=3.02s | TBT=0ms
