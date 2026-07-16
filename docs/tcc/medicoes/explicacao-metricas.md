@@ -83,3 +83,37 @@ As três primeiras medições reais do trabalho. Retratam o ponto de partida ant
 **A frase da defesa:** "Antes de medir segurança, tivemos que reconstruir o sistema do zero — e descobrimos que ele não se reconstruía sozinho. Essa é a primeira evidência concreta de que avaliar uma arquitetura BaaS exige um método reproduzível: o que não está no controle de versão não existe para quem tenta reproduzir o sistema."
 
 *Histórico F-01:* detectado e corrigido em 16/07/2026 (migration `20260716120000`).
+
+---
+
+## Segurança (Semana 3) — dois furos reais, achados e fechados
+
+Esta é a categoria central do trabalho: numa arquitetura BaaS, o banco de dados *é* a API, e a segurança depende de regras declarativas (RLS e *triggers*) escritas corretamente. Testamos essas regras como um atacante faria — autenticando-nos como cada tipo de usuário e tentando acessar o que não deveríamos. Encontramos dois furos reais.
+
+### Furo 1 — dados pessoais visíveis a qualquer usuário logado (F-02)
+
+**Em uma frase.** Qualquer pessoa com uma conta na plataforma conseguia ler o **e-mail e o telefone de todos os outros usuários**.
+
+**Como demonstramos.** Autenticados como um cliente comum, pedimos ao banco o e-mail de outro usuário — e ele veio (`provider_b@test.local`). O teste que exige "nenhum dado pessoal de terceiros deve vazar" falhou, provando o furo.
+
+**A causa.** A regra de segurança dizia, em essência, "qualquer usuário autenticado pode ler a tabela de perfis" — sem restringir a ler apenas o próprio. Os dados públicos (nome, foto) já eram servidos por um canal separado e seguro; a tabela completa, com os dados sensíveis, nunca deveria ter ficado aberta.
+
+**A correção.** Restringimos a leitura direta da tabela de perfis ao próprio registro do usuário. Confirmamos, antes, que a aplicação já obtinha os dados públicos de terceiros por outro caminho — então a correção fechou o vazamento **sem quebrar nada**.
+
+### Furo 2 — avaliação atribuída ao prestador errado (F-03)
+
+**Em uma frase.** Um cliente conseguia publicar uma avaliação **no nome de um prestador que nunca lhe prestou serviço**.
+
+**Como demonstramos.** Com um serviço legítimo do prestador A e um atendimento concluído, publicamos a avaliação apontando-a para o prestador B. O banco aceitou. O teste que exige "só se pode avaliar o dono real do serviço" falhou.
+
+**A causa — e a lição.** O sistema *já tinha* uma verificação idêntica para os agendamentos, mas **esqueceram de replicá-la para as avaliações**. É a tese do trabalho em estado puro: numa arquitetura BaaS, cada regra precisa ser declarada explicitamente no banco; onde a equipe esqueceu, não há uma camada de aplicação para salvar.
+
+**A correção.** Adicionamos às avaliações a mesma verificação que já protegia os agendamentos.
+
+### O padrão que sustenta a defesa
+
+Os dois furos seguem o mesmo ciclo, e é ele que dá credibilidade ao trabalho: **medir → detectar → corrigir → re-medir.** Guardamos a evidência dos dois estados — o registro do sistema *reprovando* (2 testes vermelhos) e depois *aprovando* (11 verdes). 
+
+**A frase da defesa:** "Não construímos testes para confirmar que o sistema estava bom — construímos para descobrir onde estava ruim. Achamos dois vazamentos reais de segurança que a inspeção visual não pegou, mostramos exatamente como explorá-los, corrigimos e provamos a correção. Um conjunto de testes que só mostra tela verde não teria valor nenhum; o valor está em ter, primeiro, a tela vermelha."
+
+*Histórico:* F-02 e F-03 detectados e corrigidos em 16/07/2026 (migrations `20260716130000` e `20260716130100`).

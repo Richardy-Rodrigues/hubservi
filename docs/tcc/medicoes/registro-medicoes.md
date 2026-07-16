@@ -40,3 +40,20 @@ Ao levantar o ambiente de testes de integração (stack Supabase local, `supabas
 | M-05 | Autenticação por papel + trigger `handle_new_user` cria profile | Vitest 3.2.7 (integração) | 2026-07-16 | 4/4 testes verdes | **Atende** | `evidencias/2026-07-16/vitest-integration.log` |
 
 O *smoke test* prova o pipeline completo: criação de usuário via *admin API* → *trigger* popula `profiles` com o `user_type` correto → login com senha → leitura do próprio perfil via PostgREST (RLS avaliado). É a fundação sobre a qual a suíte de RLS/triggers da Semana 3 será construída.
+
+## Semana 3 — Segurança: dois furos medidos, corrigidos e re-medidos
+
+Aplicação do ciclo **medir → detectar → corrigir → re-medir** aos dois furos identificados por inspeção. Cada furo foi primeiro exercitado por um teste que expressa o comportamento **seguro** — falhando contra o sistema vulnerável (evidência do furo) — e depois corrigido por *migration*, com o mesmo teste passando.
+
+| ID | Atributo | Cenário (§5.2.1) | Métrica / critério | Ferramenta + versão | Data | Antes | Depois | Evidência |
+|----|----------|------------------|--------------------|---------------------|------|-------|--------|-----------|
+| F-02 | Segurança | Exposição de PII (`email`/`phone`) a autenticado não relacionado | 0 campos expostos | Vitest 3.2.7 (integração, PostgREST real) | 2026-07-16 | **Reprova**: `client_a` lê `provider_b@test.local` | **Atende**: leitura direta de `profiles` restrita ao próprio registro | `rls-furos-ANTES.log` → `rls-furos-DEPOIS.log` |
+| F-03 | Segurança | Cliente avalia prestador que não é o dono do serviço | Tentativa bloqueada (100%) | Vitest 3.2.7 (integração) | 2026-07-16 | **Reprova**: review com `provider_id` falso é aceita | **Atende**: *trigger* rejeita `provider_id` ≠ dono do serviço | `rls-furos-ANTES.log` → `rls-furos-DEPOIS.log` |
+
+**Correções (sem efeito colateral na aplicação):**
+- **F-02** — `supabase/migrations/20260716130000_fix_profiles_pii_exposure.sql` remove a policy `USING (auth.uid() IS NOT NULL)`. Verificou-se que a aplicação lê dados de contraparte exclusivamente pela *view* `public_profiles` (`src/integrations/supabase/views.ts`), que não expõe `email`/`phone` e roda em modo *definer* (independe do RLS do chamador). A única leitura direta de `profiles` é do próprio registro (`AuthContext`, `ProfileForm`). Nenhuma quebra.
+- **F-03** — `supabase/migrations/20260716130100_validate_review_provider.sql` adiciona um *trigger* espelhando o de *bookings* (`validate_booking_provider`, `20260514100100`) — a assimetria que originava o furo.
+
+**Cobertura de cenários (7 testes de integração de segurança, todos verdes após correção):** além dos dois furos, 5 controles asseguram que o comportamento legítimo permanece — anônimo não lê `profiles`; usuário lê o próprio perfil; `public_profiles` não expõe PII; review com prestador correto e *booking* concluído é aceita; review sem *booking* concluído é rejeitada.
+
+> **Nota metodológica.** O par antes/depois é o resultado, não o painel verde final. Os arquivos `rls-furos-ANTES.log` (2 falhas, 5 controles verdes) e `rls-furos-DEPOIS.log` (11 verdes) documentam que o instrumento efetivamente reprova o sistema vulnerável — condição sem a qual um resultado favorável nada demonstraria.

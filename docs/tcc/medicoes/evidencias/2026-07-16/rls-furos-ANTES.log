@@ -1,0 +1,57 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mC:/ServiceHub/hubservi[39m
+
+ [31m❯[39m tests/integration/rls-reviews.test.ts [2m([22m[2m3 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 619[2mms[22m[39m
+   [32m✓[39m RLS — criacao de reviews[2m > [22mcliente com booking concluido cria review com provider correto (controle)[32m 164[2mms[22m[39m
+   [32m✓[39m RLS — criacao de reviews[2m > [22mcliente SEM booking concluido nao cria review (controle)[32m 150[2mms[22m[39m
+[31m   [31m×[31m RLS — criacao de reviews[2m > [22mcliente NAO deve avaliar um prestador que nao e o dono do servico[39m[32m 156[2mms[22m[39m
+[31m     → expected null not to be null[39m
+ [31m❯[39m tests/integration/rls-pii.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 710[2mms[22m[39m
+   [32m✓[39m RLS — exposicao de PII em profiles[2m > [22manonimo nao le a tabela profiles diretamente (controle)[32m 27[2mms[22m[39m
+[31m   [31m×[31m RLS — exposicao de PII em profiles[2m > [22mautenticado NAO deve ler email/phone de outro usuario[39m[32m 134[2mms[22m[39m
+[31m     → expected { Object (email, phone) } to be null[39m
+   [32m✓[39m RLS — exposicao de PII em profiles[2m > [22mautenticado le o proprio perfil normalmente (controle)[32m 126[2mms[22m[39m
+   [32m✓[39m RLS — exposicao de PII em profiles[2m > [22mview public_profiles nao expoe email nem phone (controle)[32m 287[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/integration/rls-pii.test.ts[2m > [22mRLS — exposicao de PII em profiles[2m > [22mautenticado NAO deve ler email/phone de outro usuario
+[31m[1mAssertionError[22m: expected { Object (email, phone) } to be null[39m
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+{
+  "email": "provider_b@test.local",
+  "phone": "",
+}
+
+[36m [2m❯[22m tests/integration/rls-pii.test.ts:[2m37:18[22m[39m
+    [90m 35| [39m    // Seguro: nenhum dado de outro perfil deve retornar. Enquanto o f…
+    [90m 36| [39m    // `data` traz o email/phone de provider_b e esta asercao falha (e…
+    [90m 37| [39m    [34mexpect[39m(data)[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                 [31m^[39m
+    [90m 38| [39m  })[33m;[39m
+    [90m 39| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integration/rls-reviews.test.ts[2m > [22mRLS — criacao de reviews[2m > [22mcliente NAO deve avaliar um prestador que nao e o dono do servico
+[31m[1mAssertionError[22m: expected null not to be null[39m
+[36m [2m❯[22m tests/integration/rls-reviews.test.ts:[2m70:23[22m[39m
+    [90m 68| [39m    // Seguro: deve ser rejeitado. Enquanto o furo existir, o insert e…
+    [90m 69| [39m    [90m// esta asercao falha (evidencia do furo).[39m
+    [90m 70| [39m    [34mexpect[39m(error)[33m.[39mnot[33m.[39m[34mtoBeNull[39m()[33m;[39m
+    [90m   | [39m                      [31m^[39m
+    [90m 71| [39m  })[33m;[39m
+    [90m 72| [39m})[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m5 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 11:28:31
+[2m   Duration [22m 2.06s[2m (transform 76ms, setup 193ms, collect 53ms, tests 1.33s, environment 0ms, prepare 167ms)[22m
+
