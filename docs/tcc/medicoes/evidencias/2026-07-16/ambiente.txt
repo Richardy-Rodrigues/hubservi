@@ -1,0 +1,13 @@
+AMBIENTE DE MEDICAO — Semana 2 (stack local + integracao)
+Data da coleta: 2026-07-16
+Commit (HEAD): ad89e6c4eb9e1fc7928407be84789ba2f055e066
+Branch: main
+
+STACK SUPABASE LOCAL
+Supabase CLI: 2.109.1
+Imagem Postgres: public.ecr.aws/supabase/postgres:15.8.1.085
+API_URL: http://127.0.0.1:54321
+
+RESULTADO
+supabase db reset: OK (10 migrations + seed aplicados do zero)
+test:integration (smoke): 4/4 verdes

@@ -1,0 +1,14 @@
+{
+  "mode": "smoke",
+  "connections": 5,
+  "duration_s": 5,
+  "requests_total": 7594,
+  "rps_mean": 1518.8,
+  "latency_p50_ms": 24,
+  "latency_p95_ms": 57,
+  "latency_p99_ms": 62,
+  "latency_max_ms": 73,
+  "non2xx": 0,
+  "errors": 0,
+  "timeouts": 0
+}

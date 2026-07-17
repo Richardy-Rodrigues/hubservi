@@ -1,1 +1,38 @@
 project_id = "omxfjsycxpqmzazzkccw"
+
+# Configuracao do stack local (supabase start / supabase db reset) usado para os
+# testes de integracao contra a API — Secao 5 do TCC. Valores ausentes assumem os
+# padroes da CLI. Ver docs/tcc/medicoes/README.md.
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+site_url = "http://localhost:8080"
+additional_redirect_urls = ["http://localhost:8080"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+# Confirmacao de e-mail desligada: os testes criam usuarios via admin API com
+# email_confirm=true; desligar aqui evita bloqueio no signInWithPassword local.
+enable_confirmations = false

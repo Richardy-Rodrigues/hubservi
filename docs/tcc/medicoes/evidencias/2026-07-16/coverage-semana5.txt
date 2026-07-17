@@ -1,0 +1,1 @@
+Cobertura Semana 5: lines 31.99% | branches 75% | funcs 48.38%

@@ -1,0 +1,14 @@
+
+> vite_react_shadcn_ts@0.0.0 test:integration
+> vitest run --config vitest.integration.config.ts
+
+
+[1m[46m RUN [49m[22m [36mv3.2.7 [39m[90mC:/ServiceHub/hubservi[39m
+
+ [32m✓[39m tests/integration/smoke.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 527[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 11:00:13
+[2m   Duration [22m 1.34s[2m (transform 69ms, setup 131ms, collect 17ms, tests 527ms, environment 0ms, prepare 121ms)[22m
+

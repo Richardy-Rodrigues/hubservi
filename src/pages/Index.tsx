@@ -38,7 +38,7 @@ export default function Index() {
             {[
               {
                 icon: <Search className="h-8 w-8 text-primary" />,
-                title: "Busca Inteligente",
+                title: "Busca Avançada",
                 desc: "Encontre serviços por categoria, localização e avaliações com filtros avançados.",
               },
               {

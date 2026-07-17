@@ -1,12 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarDays, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { CalendarDays, Clock, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "@/hooks/use-toast";
 
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "Pendente", variant: "outline" },
@@ -18,6 +20,7 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
 
 export function ClientDashboard() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: bookings, isLoading } = useQuery({
     queryKey: ["client-bookings", user?.id],
@@ -35,6 +38,23 @@ export function ClientDashboard() {
       return data;
     },
     enabled: !!user,
+  });
+
+  const cancelBooking = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: "cancelled" })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["client-bookings", user?.id] });
+      toast({ title: "Solicitação cancelada." });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao cancelar", description: err.message, variant: "destructive" });
+    },
   });
 
   const stats = {
@@ -135,13 +155,25 @@ export function ClientDashboard() {
                         <p className="text-sm text-muted-foreground line-clamp-1">{booking.message}</p>
                       )}
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                       {booking.scheduled_date && (
                         <span className="text-xs text-muted-foreground">
                           {format(new Date(booking.scheduled_date), "dd/MM/yyyy HH:mm", { locale: ptBR })}
                         </span>
                       )}
                       <Badge variant={sc.variant}>{sc.label}</Badge>
+                      {booking.status === "pending" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            if (confirm("Cancelar esta solicitação?")) cancelBooking.mutate(booking.id);
+                          }}
+                          disabled={cancelBooking.isPending}
+                        >
+                          Cancelar
+                        </Button>
+                      )}
                     </div>
                   </div>
                 );

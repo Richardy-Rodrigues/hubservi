@@ -6,11 +6,23 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+# Excecao: logs de teste sao evidencia citada pelo TCC e devem ser versionados.
+!docs/tcc/medicoes/evidencias/**/*.log
 
 node_modules
 dist
 dist-ssr
 *.local
+
+# Relatorios de cobertura (gerados). As evidencias citadas pelo TCC ficam
+# versionadas em docs/tcc/medicoes/evidencias/.
+coverage
+
+# Supabase local (stack de testes). config.toml, migrations e seed.sql SAO
+# versionados; artefatos temporarios do stack local, nao.
+supabase/.branches
+supabase/.temp
+supabase/.env
 
 # Editor directories and files
 .vscode/*
@@ -24,3 +36,5 @@ dist-ssr
 *.sw?
 
 /Engenharia
+
+*.env
