@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star, MapPin, ArrowLeft, User, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { BookingDialog } from "@/components/BookingDialog";
+import { ReviewForm } from "@/components/ReviewForm";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -79,7 +80,19 @@ export default function ServiceDetail() {
         .neq("id", id!)
         .limit(3);
       if (error) throw error;
-      return data;
+
+      const ids = (data ?? []).map((s) => s.id);
+      const ratingByService: Record<string, number> = {};
+      if (ids.length > 0) {
+        const { data: statsRows } = await supabase
+          .from("service_stats")
+          .select("service_id, average_rating")
+          .in("service_id", ids);
+        (statsRows ?? []).forEach((row) => {
+          ratingByService[row.service_id] = Number(row.average_rating) || 0;
+        });
+      }
+      return (data ?? []).map((s) => ({ ...s, rating: ratingByService[s.id] ?? 0 }));
     },
     enabled: !!service?.category_id,
   });
@@ -192,6 +205,7 @@ export default function ServiceDetail() {
                   ))}
                 </div>
               )}
+              <ReviewForm serviceId={service.id} providerId={service.provider_id} />
             </div>
           </div>
 
@@ -240,7 +254,7 @@ export default function ServiceDetail() {
                 <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Serviços Similares</h3>
                 <div className="space-y-3">
                   {similar.map((s: any) => {
-                    const sr = 0;
+                    const sr = s.rating ?? 0;
                     return (
                       <Link key={s.id} to={`/services/${s.id}`}>
                         <Card className="transition-shadow hover:shadow-md">

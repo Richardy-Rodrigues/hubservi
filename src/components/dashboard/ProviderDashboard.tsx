@@ -59,6 +59,29 @@ export function ProviderDashboard() {
     enabled: !!user,
   });
 
+  const serviceIds = services?.map((s) => s.id) ?? [];
+  const { data: providerStats } = useQuery({
+    queryKey: ["provider-stats", user?.id, serviceIds.length],
+    queryFn: async () => {
+      if (serviceIds.length === 0) return { avg: null as number | null };
+      const { data, error } = await supabase
+        .from("service_stats")
+        .select("average_rating, review_count")
+        .in("service_id", serviceIds);
+      if (error) throw error;
+      let weighted = 0;
+      let total = 0;
+      (data ?? []).forEach((row) => {
+        const count = Number(row.review_count) || 0;
+        const avg = Number(row.average_rating) || 0;
+        weighted += count * avg;
+        total += count;
+      });
+      return { avg: total > 0 ? weighted / total : null };
+    },
+    enabled: !!user && serviceIds.length > 0,
+  });
+
   const updateBooking = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase
@@ -95,7 +118,7 @@ export function ProviderDashboard() {
     totalBookings: bookings?.length ?? 0,
     pending: bookings?.filter((b) => b.status === "pending").length ?? 0,
     completed: bookings?.filter((b) => b.status === "completed").length ?? 0,
-    avgRating: "—",
+    avgRating: providerStats?.avg != null ? providerStats.avg.toFixed(1) : "—",
   };
 
   const isLoading = loadingBookings || loadingServices;
