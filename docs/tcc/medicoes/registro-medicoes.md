@@ -178,3 +178,14 @@ Reportar "12 altas" sem essa distinção seria alarmista; ignorá-las, negligent
 **DAST (varredura dinâmica) — pendência registrada.** O plano prevê OWASP ZAP. Optou-se por **não** executá-lo contra o `vite preview` local, porque o *baseline* mediria os cabeçalhos do servidor de preview — não do host de produção (que define CSP, HSTS, etc.) —, resultado não representativo. Numa arquitetura SPA + BaaS sem SSR, a superfície de ataque relevante é a **API do serviço gerenciado**, já coberta com profundidade pela suíte de RLS/triggers (M-06…M-13). O DAST fica como **pendência a executar contra a URL de produção** quando houver *deploy*, registrando-se aqui a decisão e sua justificativa.
 
 **Síntese da categoria Segurança.** Autorização no banco (RLS/triggers): **atende** após correção dos furos F-02/F-03 (0 acessos indevidos nos cenários testados). Dependências: **1 CVE de produção** a tratar (react-router-dom), demais de build. Schema: **limpo**. DAST: pendente contra produção. O núcleo da segurança de uma arquitetura BaaS — a autorização declarativa — está verificado e verde; o resíduo é um *upgrade* de dependência dirigido e uma varredura que depende de ambiente de produção.
+
+## Semana 8 — Integração Contínua (reprodutibilidade automatizada)
+
+Operacionaliza a exigência da Seção 5.1 — *"execuções datadas, com ambiente fixado"* — de forma automática. O workflow `.github/workflows/quality.yml` (GitHub Actions) roda a cada *push* nas branches `main`/`tcc/**` e em *pull requests*, fixando o ambiente (`node-version-file: .nvmrc`, `npm ci` sobre o *lockfile* único) e produzindo logs datados com URL citável — a prova de que os números não foram coletados à mão.
+
+**Desenho dos *gates*:**
+- **Cobertura (`npm run test:coverage`)** — *gate* rígido: falha o CI se algum limiar de `vitest.config.ts` regredir (global 30%, módulos críticos ≥75%).
+- **Ciclos (`madge --circular`)** — *gate* rígido: falha se surgir dependência circular.
+- **Lint** — passo **informativo** (`continue-on-error`), não bloqueia: o débito de *lint* é conhecido e rastreado (M-02/M-21), não uma regressão a barrar. Reportá-lo sem travar o *pipeline* mantém o CI verde e honesto ao mesmo tempo.
+
+Os **testes de integração** (stack Supabase local) ficam **fora do CI** por decisão explícita: são lentos e sujeitos a instabilidade em *runner* efêmero. Rodam localmente (`npm run test:integration`) com o stack de pé; sua evidência já está versionada (M-04…M-13). Validação local dos comandos do CI antes do commit: cobertura *exit 0* (44 testes, limiares atendidos), madge 0 ciclos.

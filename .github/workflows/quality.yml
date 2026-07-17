@@ -1,0 +1,59 @@
+name: Quality
+
+# Pipeline de qualidade do TCC (Secao 5.1): produz execucoes datadas, com ambiente
+# fixado e URL citavel, das metricas automatizaveis — a prova de que os numeros nao
+# foram coletados a mao. Gates rigidos: cobertura (com limiares) e ausencia de ciclos.
+# O lint roda como reportado (nao bloqueia): o repositorio tem debito de lint conhecido
+# e rastreado (M-02), nao uma regressao a barrar. Os testes de integracao (stack
+# Supabase local) nao entram aqui de proposito — sao lentos/flaky em CI; rodam local.
+
+on:
+  push:
+    branches: [main, "tcc/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Instalar dependencias (lockfile unico)
+        run: npm ci
+
+      - name: Lint (reportado, nao bloqueia — debito conhecido M-02)
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Testes unitarios + cobertura (gate: limiares em vitest.config)
+        run: npm run test:coverage
+
+      - name: Dependencias circulares (gate: 0 ciclos)
+        run: npx madge --circular --extensions ts,tsx src/
+
+      - name: Publicar relatorio de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+      - name: Resumo
+        if: always()
+        run: |
+          {
+            echo "## Pipeline de qualidade"
+            echo "- Lint: ${{ steps.lint.outcome }} (informativo — debito rastreado como M-02)"
+            echo "- Testes + cobertura: gate aplicado (limiares em vitest.config.ts)"
+            echo "- Ciclos de dependencia: gate 0"
+          } >> "$GITHUB_STEP_SUMMARY"
