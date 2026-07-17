@@ -75,7 +75,7 @@ A análise a seguir é **preliminar e qualitativa**, derivada da inspeção arqu
 | **Ponto de sensibilidade** | O desempenho de CD-2 é sensível à eficiência da *view* `service_stats` e à indexação das tabelas consultadas. |
 | **Ponto de compromisso** | A delegação total de autorização ao banco (RLS) favorece simplicidade e consistência (positivo para manutenibilidade e segurança), mas concentra o risco em um único mecanismo declarativo e desloca o esforço de teste para a fronteira cliente–banco (impacto em testabilidade). |
 | **Ponto de compromisso** | A arquitetura SPA reduz acoplamento de *backend* e acelera o desenvolvimento, porém transfere carga de processamento e desempenho percebido para o cliente (tensão entre manutenibilidade/agilidade e desempenho — CD-1). |
-| **Risco** | Ausência atual de ferramentas de análise estática avançada, desempenho e segurança configuradas (Seção 7), o que impede, no estágio atual, a verificação quantitativa dos atributos — mitigado pelo cronograma de execução (Seção 8). |
+| **Risco** | O desempenho de carregamento inicial do *frontend* não atinge a meta (LCP acima de 2,5 s mesmo após *code-splitting*), confirmando quantitativamente o ponto de compromisso CD-1 (Seção 7.3.5). |
 | **Não risco** | A imutabilidade do `user_type` e a validação de `provider_id` por *trigger* fornecem defesa em profundidade contra escalonamento e *spoofing* de prestador, reduzindo o risco de CS-2. |
 
 ## 6.5 Articulação com o plano de métricas

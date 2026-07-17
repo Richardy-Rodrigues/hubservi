@@ -40,7 +40,7 @@ Avaliar tecnicamente a arquitetura de software da plataforma Hubservi, baseada e
 8. Executar testes de desempenho.
 9. Analisar os resultados obtidos.
 
-> **Nota de escopo deste artigo.** Os objetivos específicos 1 a 4 correspondem aos resultados parciais já consolidados e relatados neste artigo; os objetivos 5 a 9 constituem etapas planejadas, com execução prevista para as fases finais do cronograma (Seção 8).
+> **Nota de escopo deste artigo.** Os objetivos específicos 1 a 4 (delimitação, modelagem, documentação e definição de cenários) e os objetivos 5 a 9 (execução de testes automatizados, análise estática, testes de segurança e de desempenho, e análise) foram executados; os resultados são reportados na Seção 7 e derivam do registro reprodutível em `docs/tcc/medicoes/`.
 
 ## 1.5 Delimitação do escopo
 
