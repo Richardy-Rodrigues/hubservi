@@ -5,12 +5,12 @@ divisão equilibrada e um único *handoff* no meio. As "falas-chave" são o que
 **precisa** ser dito em cada slide; o resto é apoio. Os números conferem com a
 Seção 7 e com o registro em [`medicoes/`](medicoes/).
 
-- **Apresentador A** — abertura e fundamentos (slides 1–5, ~4:30).
-- **Apresentador B** — resultados e contribuição (slides 6–11, ~5:00).
-- ~0:30 de folga para respiração/transição.
+- **Apresentador A** — abertura, instrumento e método (slides 1–6, ~4:55).
+- **Apresentador B** — resultados e contribuição (slides 7–12, ~5:05).
 
-> **Regra de ouro do tempo:** se estiver atrasando, corte detalhe dos slides 4 e 8,
-> nunca o slide 3 (escopo) nem o 7 (segurança) — são o coração da defesa.
+> **Regra de ouro do tempo:** se estiver atrasando, corte detalhe dos slides 5
+> (artefatos) e 9, nunca o slide 3 (escopo) nem o 8 (segurança) — são o coração da
+> defesa.
 
 ---
 
@@ -19,17 +19,18 @@ Seção 7 e com o registro em [`medicoes/`](medicoes/).
 | # | Slide | Quem | Tempo | Acumulado |
 |---|-------|------|-------|-----------|
 | 1 | Capa / título | A | 0:15 | 0:15 |
-| 2 | O problema | A | 1:00 | 1:15 |
-| 3 | Objeto vs. instrumento (escopo) | A | 1:00 | 2:15 |
-| 4 | O sistema Hubservi (o laboratório) | A | 1:15 | 3:30 |
-| 5 | O método de avaliação | A | 1:00 | 4:30 |
-| — | **HANDOFF** | A→B | — | 4:30 |
-| 6 | Achado transversal: reprodutibilidade | B | 1:00 | 5:30 |
-| 7 | Segurança (o núcleo) | B | 1:30 | 7:00 |
-| 8 | Confiabilidade + Testabilidade | B | 1:00 | 8:00 |
-| 9 | Desempenho + Manutenibilidade | B | 1:15 | 9:15 |
-| 10 | Contribuição e conclusão | B | 0:40 | 9:55 |
-| 11 | Encerramento / perguntas | B (+A) | 0:05 | 10:00 |
+| 2 | O problema | A | 0:55 | 1:10 |
+| 3 | Objeto vs. instrumento (escopo) | A | 0:55 | 2:05 |
+| 4 | Como construímos o instrumento (metodologia + stack) | A | 1:05 | 3:10 |
+| 5 | Artefatos de engenharia | A | 0:50 | 4:00 |
+| 6 | O método de avaliação | A | 0:55 | 4:55 |
+| — | **HANDOFF** | A→B | — | 4:55 |
+| 7 | Achado transversal: reprodutibilidade | B | 0:55 | 5:50 |
+| 8 | Segurança (o núcleo) | B | 1:25 | 7:15 |
+| 9 | Confiabilidade + Testabilidade | B | 0:55 | 8:10 |
+| 10 | Desempenho + Manutenibilidade | B | 1:05 | 9:15 |
+| 11 | Contribuição e conclusão | B | 0:40 | 9:55 |
+| 12 | Encerramento / perguntas | B (+A) | 0:05 | 10:00 |
 
 ---
 
@@ -45,7 +46,7 @@ web moderna — e vamos mostrar como, e o que encontramos."
 
 ---
 
-## Slide 2 — O problema (A · 1:00)
+## Slide 2 — O problema (A · 0:55)
 
 **Mostrar:** diagrama simples — de um lado "arquitetura tradicional (servidor de
 aplicação)", do outro "BaaS/Serverless (regras no banco: RLS, triggers)".
@@ -62,7 +63,7 @@ aplicação)", do outro "BaaS/Serverless (regras no banco: RLS, triggers)".
 
 ---
 
-## Slide 3 — Objeto vs. instrumento (A · 1:00) — *responde a dúvida de escopo*
+## Slide 3 — Objeto vs. instrumento (A · 0:55) — *responde a dúvida de escopo*
 
 **Mostrar:** duas caixas — **OBJETO DE PESQUISA: a avaliação** | **INSTRUMENTO: o
 Hubservi (desenvolvido 100% por nós)**. Uma seta: "avaliar RLS exige acesso ao
@@ -83,27 +84,53 @@ código e ao banco → só possível num sistema próprio".
 
 ---
 
-## Slide 4 — O sistema Hubservi (A · 1:15)
+## Slide 4 — Como construímos o instrumento (A · 1:05)
 
-**Mostrar:** 1 print da aplicação + diagrama de arquitetura enxuto (React SPA →
-Supabase: Auth, PostgreSQL com RLS). Os 4 fluxos como ícones: **autenticação →
-serviço → contratação → avaliação**.
+**Mostrar:** à esquerda, o processo em marcos **M1 → M5**; à direita, a **stack** em
+chips, separada por camada (cliente / BaaS). Rodapé: "escopo MVP · RF-xx / RNF-xx
+priorizados · lint + testes + revisão a cada alteração".
 
 **Falas-chave (A):**
-- O Hubservi é um **marketplace de serviços** que conecta clientes e prestadores.
-  Stack: **React + TypeScript no cliente, Supabase (PostgreSQL) como BaaS**, sem
-  servidor de aplicação próprio — o caso representativo de SPA + BaaS + Serverless.
-- Quatro fluxos críticos que concentram as regras de negócio: cadastro/login, criar e
-  buscar serviços, contratar (*booking*) e avaliar (*review*).
-- **É sobre esses fluxos que os testes de avaliação incidem.** (Não é uma vitrine de
-  funcionalidades — é o que precisávamos ter para poder medir.)
-
-> *Se houver demo ao vivo: 20 s no máximo, mostrando login → contratar → avaliar.
-> Se não, o print basta. Não gastar mais que o previsto aqui.*
+- O Hubservi é um **marketplace de serviços** — clientes e prestadores. E foi
+  construído com **processo estruturado de Engenharia de Software**, não de forma
+  ad-hoc: isso importa porque **a validade do experimento depende de o instrumento ser
+  conhecido e controlado**.
+- **Concepção:** TAP, Canvas e SWOT delimitaram problema, escopo MVP, premissas e
+  critérios de sucesso. **Planejamento:** EAP e 5W2H organizaram as entregas, e os
+  requisitos foram priorizados com identificadores rastreáveis — **RF** funcionais,
+  **RNF** não funcionais.
+- **Construção incremental por marcos:** M1 requisitos e arquitetura → M2 fluxos
+  centrais → **M3 segurança e governança (RLS e triggers)** → M4 qualidade → M5
+  evolução da descoberta. Com **lint, testes e revisão a cada alteração**.
+- **A stack:** React + TypeScript + Vite no cliente; **Supabase** como BaaS — Auth,
+  PostgreSQL, **RLS e triggers**; React Query, react-hook-form + Zod, Tailwind.
+  **Sem servidor de aplicação próprio** — é o que caracteriza o caso.
 
 ---
 
-## Slide 5 — O método de avaliação (A · 1:00)
+## Slide 5 — Artefatos de engenharia (A · 0:50)
+
+**Mostrar:** os artefatos agrupados em 3 blocos (Concepção/Planejamento · Requisitos ·
+Modelagem). Se possível, **miniaturas reais** do DER e de um BPMN ao fundo.
+
+**Falas-chave (A):**
+- Produzimos o conjunto de artefatos que sustenta o trabalho: **TAP, EAP, Canvas,
+  SWOT, 5W2H**; os **requisitos RF/RNF** priorizados; e a modelagem — **UML** (casos
+  de uso, classes, componentes, sequência, implantação), **BPMN** dos processos de
+  contratação e gerenciamento, e o **modelo de dados (DER + dicionário)**.
+- **O ponto que amarra tudo:** esses artefatos de modelagem **não são um anexo** — eles
+  **atendem aos objetivos específicos 2 e 3** do próprio TCC, e é **deles que derivamos
+  a árvore de utilidade do ATAM e os cenários de avaliação**. Modelar o instrumento é o
+  que torna possível decidir *o que* medir.
+- Os quatro fluxos críticos — **autenticação → serviço → contratação → avaliação** —
+  saem dessa modelagem e são a superfície sobre a qual os testes incidem.
+
+> *Se houver demo ao vivo: 20 s no máximo (login → contratar → avaliar). Se atrasar,
+> este é o primeiro slide a enxugar — cite os artefatos sem detalhar cada um.*
+
+---
+
+## Slide 6 — O método de avaliação (A · 0:55)
 
 **Mostrar:** a cadeia **Atributo → Cenário → Métrica → Critério → Ferramenta** e, ao
 lado, o ciclo **Medir → Detectar → Corrigir → Re-medir**. Rodapé: "ISO/IEC 25010 —
@@ -119,11 +146,11 @@ lado, o ciclo **Medir → Detectar → Corrigir → Re-medir**. Rodapé: "ISO/IE
 
 ---
 
-## → HANDOFF (4:30) — B assume
+## → HANDOFF (4:55) — B assume
 
 ---
 
-## Slide 6 — Achado transversal: reprodutibilidade (B · 1:00)
+## Slide 7 — Achado transversal: reprodutibilidade (B · 0:55)
 
 **Mostrar:** título "O sistema não se reconstruía sozinho". Um `permission denied`
 estilizado.
@@ -141,7 +168,7 @@ estilizado.
 
 ---
 
-## Slide 7 — Segurança: o núcleo (B · 1:30) — *o slide mais forte*
+## Slide 8 — Segurança: o núcleo (B · 1:25) — *o slide mais forte*
 
 **Mostrar:** os dois furos, lado a lado, cada um com **ANTES (vermelho) → DEPOIS
 (verde)**.
@@ -163,7 +190,7 @@ estilizado.
 
 ---
 
-## Slide 8 — Confiabilidade + Testabilidade (B · 1:00)
+## Slide 9 — Confiabilidade + Testabilidade (B · 0:55)
 
 **Mostrar:** duas colunas. Confiabilidade: "máquina de estados ✓, integridade ✓,
 fluxo ponta a ponta ✓". Testabilidade: gráfico simples **18% → 32%**, com barra dos
@@ -179,7 +206,7 @@ módulos críticos em **82–100%**.
 
 ---
 
-## Slide 9 — Desempenho + Manutenibilidade (B · 1:15)
+## Slide 10 — Desempenho + Manutenibilidade (B · 1:05)
 
 **Mostrar:** Desempenho — "API 253 ms ✓ | Página 3,2 s ✗". Manutenibilidade —
 "0 dependências circulares ✓ | duplicação nos 2 painéis ✗".
@@ -196,7 +223,7 @@ módulos críticos em **82–100%**.
 
 ---
 
-## Slide 10 — Contribuição e conclusão (B · 0:40)
+## Slide 11 — Contribuição e conclusão (B · 0:40)
 
 **Mostrar:** "Contribuição: um **procedimento reprodutível de avaliação técnica**,
 transferível a outras aplicações BaaS." Abaixo: a tabela-síntese por atributo.
@@ -213,7 +240,7 @@ transferível a outras aplicações BaaS." Abaixo: a tabela-síntese por atribut
 
 ---
 
-## Slide 11 — Encerramento (B, com A ao lado · 0:05)
+## Slide 12 — Encerramento (B, com A ao lado · 0:05)
 
 **Mostrar:** "Obrigado(a). Perguntas?" + repositório/contato.
 

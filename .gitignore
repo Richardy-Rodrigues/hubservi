@@ -37,4 +37,5 @@ supabase/.env
 
 /Engenharia
 
-*.env
+.env
+.env_local

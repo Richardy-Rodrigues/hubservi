@@ -93,7 +93,7 @@ export default function Auth() {
       <div className="container mx-auto flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Bem-vindo ao ServiHub</CardTitle>
+            <CardTitle className="text-2xl">Bem-vindo ao HubServi</CardTitle>
             <CardDescription>Entre ou crie sua conta</CardDescription>
           </CardHeader>
           <CardContent>
