@@ -15,6 +15,8 @@ interface MockConfig {
   // Erro a retornar em qualquer operacao terminal sobre a tabela indicada.
   errors?: Record<string, { message: string } | null>;
   session?: unknown;
+  // Erro a retornar por metodo de supabase.auth (ex.: resetPasswordForEmail).
+  authErrors?: Partial<Record<"resetPasswordForEmail" | "updateUser", { message: string }>>;
 }
 
 type Predicate = (r: Row) => boolean;
@@ -120,6 +122,7 @@ export function createSupabaseMock(config: MockConfig = {}) {
     Object.entries(config.tables ?? {}).map(([k, rows]) => [k, rows.map((r) => ({ ...r }))]),
   );
   const errors = config.errors ?? {};
+  const authErrors = config.authErrors ?? {};
   let session = config.session ?? null;
   const authListeners: Array<(event: string, s: unknown) => void> = [];
 
@@ -135,6 +138,15 @@ export function createSupabaseMock(config: MockConfig = {}) {
         session = null;
         return Promise.resolve({ error: null });
       },
+      resetPasswordForEmail: vi.fn((_email: string, _options?: unknown) =>
+        Promise.resolve({ data: {}, error: authErrors.resetPasswordForEmail ?? null }),
+      ),
+      updateUser: vi.fn((_attrs: unknown) =>
+        Promise.resolve({
+          data: { user: authErrors.updateUser ? null : { id: "u1" } },
+          error: authErrors.updateUser ?? null,
+        }),
+      ),
     },
     // Hooks de teste:
     __store: store,

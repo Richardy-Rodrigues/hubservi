@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { loginSchema, registerSchema } from "../auth";
+import { loginSchema, registerSchema, forgotPasswordSchema, newPasswordSchema } from "../auth";
 
 describe("loginSchema", () => {
   it("aceita e-mail e senha validos", () => {
@@ -25,5 +25,35 @@ describe("registerSchema", () => {
   });
   it("rejeita userType fora do enum", () => {
     expect(registerSchema.safeParse({ ...base, userType: "admin" }).success).toBe(false);
+  });
+});
+
+describe("forgotPasswordSchema", () => {
+  it("aceita e-mail valido", () => {
+    expect(forgotPasswordSchema.safeParse({ email: "a@b.com" }).success).toBe(true);
+  });
+  it("rejeita e-mail invalido", () => {
+    expect(forgotPasswordSchema.safeParse({ email: "invalido" }).success).toBe(false);
+  });
+});
+
+describe("newPasswordSchema", () => {
+  it("aceita senhas iguais com no minimo 6 caracteres", () => {
+    expect(
+      newPasswordSchema.safeParse({ password: "123456", confirmPassword: "123456" }).success,
+    ).toBe(true);
+  });
+  it("rejeita senha com menos de 6 caracteres", () => {
+    expect(newPasswordSchema.safeParse({ password: "123", confirmPassword: "123" }).success).toBe(
+      false,
+    );
+  });
+  it("rejeita confirmacao divergente apontando o campo confirmPassword", () => {
+    const result = newPasswordSchema.safeParse({ password: "123456", confirmPassword: "654321" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.errors[0].path).toEqual(["confirmPassword"]);
+      expect(result.error.errors[0].message).toBe("As senhas não coincidem");
+    }
   });
 });

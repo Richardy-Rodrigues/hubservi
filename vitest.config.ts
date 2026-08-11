@@ -44,6 +44,8 @@ export default defineConfig({
         "src/components/ReviewForm.tsx": { lines: 85 },
         "src/components/BookingDialog.tsx": { lines: 90 },
         "src/components/ProtectedRoute.tsx": { lines: 90 },
+        "src/components/ForgotPasswordDialog.tsx": { lines: 85 },
+        "src/pages/ResetPassword.tsx": { lines: 80 },
         "src/components/dashboard/ServiceForm.tsx": { lines: 80 },
         "src/components/dashboard/ProfileForm.tsx": { lines: 85 },
       },
