@@ -36,6 +36,17 @@ Todos os comandos são executados a partir da raiz do repositório, com `npm ci`
 
 Para registrar o ambiente de uma nova rodada, replicar o `ambiente.txt` da rodada anterior atualizando os valores — ele deve sempre conter o SHA de `git rev-parse HEAD`.
 
+## Prints de tela das execuções
+
+As saídas preservadas podem ser reencenadas na tela para captura, **sem re-executar nenhuma medição** — o que mantém as imagens numericamente idênticas ao que o artigo reporta:
+
+```powershell
+node docs/tcc/medicoes/scripts/gerar-relatorios-html.mjs      # relatórios nativos de ESLint e Lighthouse
+.\docs\tcc\medicoes\scripts\replay-evidencia.ps1 -List        # as 18 telas disponíveis
+```
+
+Protocolo, índice das telas e convenção de captura em [`evidencias/prints/README.md`](evidencias/prints/README.md). Os `.log` são impressos com as sequências ANSI originais (o vermelho/verde do Vitest é o da execução real) e os JSONs são renderizados pelo relatório oficial da própria ferramenta.
+
 ### Nota sobre o *lockfile* (condição de reprodutibilidade)
 
 O repositório continha três *lockfiles* simultâneos (`bun.lock`, `bun.lockb`, `package-lock.json`), resíduo do *scaffold* original. Isso não é apenas desorganização: ferramentas de análise de composição de software (SCA, como o Snyk) resolvem o grafo de dependências a partir do *lockfile* que encontrarem, de modo que dois grafos divergentes tornariam a métrica "0 CVEs de severidade alta/crítica" dependente de qual arquivo a ferramenta escolheu — irreprodutível por construção. Os arquivos do `bun` foram removidos (o gerenciador sequer está instalado no ambiente de desenvolvimento) e o `package.json` passou a declarar `packageManager: "npm@11.9.0"` e `engines.node`.
