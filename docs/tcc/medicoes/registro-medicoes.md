@@ -2,7 +2,20 @@
 
 Tabela mestra de todas as medições realizadas. Cada linha remete a um arquivo de evidência em `evidencias/AAAA-MM-DD/` e ao commit em que foi coletada. Protocolo e comandos de reprodução em [README.md](README.md).
 
-> **Estado do repositório na coleta de 2026-07-15.** As medições desta data foram coletadas sobre a árvore de trabalho no commit `ad89e6c`, com as alterações da Semana 1 já aplicadas (extração de *schemas*, configuração de cobertura, remoção dos *lockfiles* do `bun`) porém ainda não *commitadas*. O `ambiente.txt` registra o SHA de referência; ao *commitar* a fundação, esta nota deve ser substituída pelo novo SHA.
+> **Estado do repositório nas coletas — verificação de reprodutibilidade (2026-08-20).**
+>
+> As medições foram coletadas sobre a **árvore de trabalho**, não sobre um commit: o `ambiente.txt` de 2026-07-15 declara `Arvore de trabalho limpa: NAO`. A verificação conduzida para o [Apêndice B](../apendice-b-reproducao.md) determinou a que commit cada coleta corresponde, e o resultado é registrado aqui na íntegra — inclusive a parte desfavorável, conforme a regra 3 do [protocolo](README.md).
+>
+> | Coleta | Commit que reproduz | Situação |
+> |---|---|---|
+> | Baseline, Semana 1 (M-02, M-03) | `b2897c2` | **Reproduz exato** — 19 erros/9 avisos; 0 ciclos |
+> | Baseline, Semana 1 (**M-01**) | *nenhum* | **Não reproduz** — ver abaixo |
+> | Semanas 2–8 (M-01b, M-04…M-26) | `25ecace` | **Reproduz exato** — verificado em M-01b, M-21, M-22, M-03/M-23 |
+> | Furos F-02/F-03 (antes) | `5e324f5` sem as 2 *migrations* de correção | Reproduz sob manipulação declarada |
+>
+> **Por que `25ecace`, e não um commit `docs(tcc)` da campanha.** A árvore medida em 2026-07-16 já continha `ReviewForm.tsx` e `ProfileForm.tsx`, arquivos então **não commitados**, que só entraram no histórico em `25ecace`. Nos commits `aa5df76`…`bb0bf13` estão os *testes* desses componentes **sem** os componentes — ali a suíte nem resolve os imports. É a mesma família de problema que F-01: o histórico versionado, sozinho, não reconstruía o estado avaliado.
+>
+> **M-01 (18,03%) não é reproduzível.** O `coverage-summary.json` de 2026-07-15 já lista `ReviewForm.tsx` e `ProfileForm.tsx` (esta com 62,5%). A árvore medida é o `src/` de `25ecace` com a suíte de 11 testes de `b2897c2` — combinação inexistente no histórico. Em `b2897c2`, a mesma medição dá **16,45%**. O veredito não muda (reprova o critério em ambos os casos, e a leitura de que a suíte cobria apenas quatro alvos pontuais permanece), mas o número **18,03% deve ser lido como não reproduzível**.
 
 ## Baseline — Semana 1 (fundação)
 
@@ -124,11 +137,15 @@ Teste de carga do endpoint público de listagem de serviços ativos (PostgREST),
 
 | ID | Atributo | Métrica | Critério | Ferramenta | Data | Valor | Veredito |
 |----|----------|---------|----------|------------|------|-------|----------|
-| M-18 | Eficiência de desempenho | Latência p95 (leitura sob carga) | ≤ 800 ms | autocannon 8 | 2026-07-16 | **253 ms** (30 conexões, 20 s, 44.413 req) | **Atende** |
+| M-18 | Eficiência de desempenho | Latência de cauda (leitura sob carga) — **p97,5**, ver nota | ≤ 800 ms | autocannon 8 | 2026-07-16 | **253 ms** (30 conexões, 20 s, 44.413 req) | **Atende** |
 | M-19 | Eficiência de desempenho | Taxa de erro sob carga | < 1% | autocannon 8 | 2026-07-16 | **0%** (0 non-2xx, 0 timeouts) | **Atende** |
 | M-20 | Eficiência de desempenho | Vazão | (observacional) | autocannon 8 | 2026-07-16 | **≈ 2.221 req/s** | — |
 
 Evidência: `evidencias/2026-07-16/autocannon-smoke.json` e `autocannon-load.json`. Reproduzível por `npm run load:seed && npm run load:run` com o stack local de pé.
+
+> **Nota sobre o percentil reportado (correção de rótulo, 2026-08-20).** O autocannon **não emite p95** no conjunto padrão de percentis do seu histograma — os vizinhos são p90 e p97,5. O valor de **253 ms** é, portanto, o **p97,5**, e o campo do JSON de evidência que o carrega (`latency_p95_ms`) estava mal rotulado; `tests/load/load-services.mjs` passou a gravar `latency_p97_5_ms`, preservando `latency_p95_ms` apenas quando a ferramenta de fato o fornecer.
+>
+> A correção é de rótulo, não de resultado: **p97,5 é mais conservador que p95** — se p97,5 ≤ 800 ms, então p95 ≤ 800 ms necessariamente. O veredito "atende" permanece, com folga ainda maior do que a reportada. Optou-se por reetiquetar em vez de re-medir porque uma nova execução hoje correria sobre outra árvore e outro estado de máquina, produzindo um número que não corresponderia ao restante da Seção 7.
 
 **Ameaça à validade (§5.4).** A medição corre contra o **stack Supabase local** (ambiente controlado, sem latência de rede real nem limites de plano gerenciado). O resultado é um **piso de desempenho da camada de dados** — a API responde à listagem com folga sob concorrência. Uma medição contra a instância gerenciada (rede + *rate limits* do *free tier*) tende a apresentar p95 maior; essa diferença é declarada como limite de validade externa. O contraste entre a API rápida (leitura p95 253 ms) e o carregamento inicial lento da SPA (LCP 3,17 s) localiza o gargalo de desempenho no **frontend (bundle)**, não no backend — insumo direto para a análise da Seção 7.
 

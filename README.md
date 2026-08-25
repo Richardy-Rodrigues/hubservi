@@ -27,17 +27,21 @@ Principais fluxos:
 - Qualidade: ESLint
 
 ### Requisitos
-- Node.js 20+
-- npm 10+ (ou Bun)
+- Node.js 20+ (versao fixada em `.nvmrc`)
+- npm 11+ (`package-lock.json` e o unico lockfile valido; use `npm ci`)
 - Projeto Supabase com credenciais validas
+- Docker Desktop **em execucao**, apenas para os testes de integracao
+  (a CLI do Supabase nao precisa ser instalada: e baixada por `npx supabase@2.109.1`)
 
 ### Configuracao de ambiente
-Crie um arquivo .env na raiz com:
+Copie o template e preencha com as credenciais do seu projeto Supabase:
 
-```env
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_PUBLISHABLE_KEY=...
+```sh
+cp .env.example .env
 ```
+
+Os testes de integracao **nao** usam esse arquivo: eles falam com o stack local
+pelas chaves fixas da CLI, resolvidas em `tests/integration/helpers/env.ts`.
 
 ### Como executar
 
@@ -56,6 +60,52 @@ Aplicacao local: http://localhost:8080
 - npm run lint: analise estatica
 - npm run test: execucao unica de testes
 - npm run test:watch: testes em watch
+
+### Testes de integracao (stack Supabase local)
+
+Rodam contra o PostgREST real, com clientes autenticados por papel — nao contra
+mocks. Exigem Docker em execucao e ficam **fora do CI** por decisao explicita
+(lentos e instaveis em runner efemero).
+
+```sh
+npm run db:start          # sobe o stack local (a 1a vez baixa as imagens)
+npm run db:reset          # aplica migrations + seed sobre um banco limpo
+npm run test:integration  # suite de RLS, triggers e integridade (9 arquivos)
+npm run db:stop
+```
+
+Passo a passo completo, do zero:
+[docs/tcc/apendice-b-reproducao.md](docs/tcc/apendice-b-reproducao.md#passo-a-passo-na-sua-máquina)
+
+Atencao: `npm run test:integration` **apaga os dados de dominio** do stack local
+(`reviews`, `bookings`, `services`) a cada arquivo de teste. Usuarios e
+categorias sao preservados.
+
+### Teste de carga
+
+```sh
+npm run load:seed         # semeia N servicos (SEED_N, padrao 50)
+npm run load:smoke        # 5 conexoes / 5 s
+npm run load:run          # 30 conexoes / 20 s
+```
+
+Saidas em `docs/tcc/medicoes/evidencias/AAAA-MM-DD/`.
+
+### Medicoes de qualidade (TCC)
+
+O repositorio e objeto de um TCC de avaliacao arquitetural. As medicoes, suas
+evidencias e o protocolo de reproducao estao em
+[docs/tcc/medicoes/](docs/tcc/medicoes/):
+
+```sh
+npm run repro             # lista as trilhas de reproducao
+npm run repro:offline     # ~1-2 min, sem Docker: cobertura, lint, ciclos, duplicacao
+npm run repro:integracao  # ~4-6 min, com Docker: RLS e triggers
+```
+
+Cada trilha executa em `git worktree` fixado no commit da coleta, para que os
+numeros saiam identicos aos do artigo. Detalhes, tempos e o que **nao** e
+reproduzivel: [docs/tcc/apendice-b-reproducao.md](docs/tcc/apendice-b-reproducao.md).
 
 ### Regras de negocio essenciais
 - Tipos de usuario: client e provider
@@ -119,17 +169,21 @@ Core flows:
 - Quality: ESLint
 
 ### Requirements
-- Node.js 20+
-- npm 10+ (or Bun)
+- Node.js 20+ (pinned in `.nvmrc`)
+- npm 11+ (`package-lock.json` is the only valid lockfile; use `npm ci`)
 - Supabase project with valid credentials
+- Docker Desktop **running**, for integration tests only
+  (the Supabase CLI needs no install: it is fetched via `npx supabase@2.109.1`)
 
 ### Environment setup
-Create .env at repository root:
+Copy the template and fill in your Supabase project credentials:
 
-```env
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_PUBLISHABLE_KEY=...
+```sh
+cp .env.example .env
 ```
+
+Integration tests do **not** read this file: they talk to the local stack using
+the CLI's fixed demo keys, resolved in `tests/integration/helpers/env.ts`.
 
 ### Run locally
 
@@ -148,6 +202,52 @@ Local app: http://localhost:8080
 - npm run lint: static analysis
 - npm run test: run tests once
 - npm run test:watch: watch mode
+
+### Integration tests (local Supabase stack)
+
+These run against the real PostgREST with role-authenticated clients, not
+mocks. They require Docker and are deliberately **excluded from CI** (slow and
+flaky on ephemeral runners).
+
+```sh
+npm run db:start          # start the local stack (first run pulls images)
+npm run db:reset          # apply migrations + seed on a clean database
+npm run test:integration  # RLS, trigger and integrity suite (9 files)
+npm run db:stop
+```
+
+Full step-by-step, from scratch:
+[docs/tcc/apendice-b-reproducao.md](docs/tcc/apendice-b-reproducao.md#passo-a-passo-na-sua-máquina)
+
+Note: `npm run test:integration` **wipes domain data** from the local stack
+(`reviews`, `bookings`, `services`) before each test file. Users and categories
+are preserved.
+
+### Load test
+
+```sh
+npm run load:seed         # seed N services (SEED_N, default 50)
+npm run load:smoke        # 5 connections / 5 s
+npm run load:run          # 30 connections / 20 s
+```
+
+Output goes to `docs/tcc/medicoes/evidencias/YYYY-MM-DD/`.
+
+### Quality measurements (thesis)
+
+This repository is the case study of an architectural evaluation thesis.
+Measurements, evidence and the reproduction protocol live in
+[docs/tcc/medicoes/](docs/tcc/medicoes/):
+
+```sh
+npm run repro             # list reproduction tracks
+npm run repro:offline     # ~1-2 min, no Docker: coverage, lint, cycles, duplication
+npm run repro:integracao  # ~4-6 min, with Docker: RLS and triggers
+```
+
+Each track runs inside a `git worktree` pinned to the commit where the data was
+collected, so the numbers match the article exactly. Details, timings and what
+is **not** reproducible: [docs/tcc/apendice-b-reproducao.md](docs/tcc/apendice-b-reproducao.md).
 
 ### Core business rules
 - User roles: client and provider

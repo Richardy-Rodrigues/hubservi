@@ -2,6 +2,8 @@
 
 Capturas de tela das saídas das ferramentas de medição, para apresentação. Complementam — não substituem — os arquivos brutos em `evidencias/AAAA-MM-DD/`, que continuam sendo a evidência primária citada em [`registro-medicoes.md`](../../registro-medicoes.md).
 
+> **Estado do conjunto:** o `replay-evidencia.ps1` define **18 telas**; há **17 PNGs** capturados. Falta o **P-06** (Madge / M-03) — a tela existe e é reproduzível a qualquer momento com `.\replay-evidencia.ps1 -Id P-06`, apenas não foi capturada. Não há prejuízo de evidência: M-03 é atestado pelo arquivo bruto `2026-07-15/madge-circular.txt` e confirmado por segunda ferramenta em M-23.
+
 ## Nota de método (vale como legenda de todas as imagens)
 
 As imagens **reencenam na tela as saídas preservadas** das execuções de **2026-07-15 e 2026-07-16**, no commit `ad89e6c`. **Nenhuma medição foi re-executada para produzi-las** — é o que garante que cada número visível nas capturas seja idêntico ao reportado na Seção 7 do artigo.
@@ -75,6 +77,16 @@ Duas telas não exibem o arquivo inteiro, e o próprio print informa isso:
 - **P-08** — `depcruise-metrics.txt` tem 2.603 linhas (inclui `node_modules`). A tela filtra para módulos e pastas de `src/`, excluindo testes e o shadcn vendorizado (`components/ui/`), e mostra o topo e o fim da lista ordenada por instabilidade — que é o par folhas voláteis / núcleo estável descrito no M-24. O aviso de filtro e a contagem `43 de 2.603` aparecem na imagem.
 - **P-03, P-07, P-17** — dos JSONs grandes, a tela imprime o nó relevante (`.total`, `.statistics.total`, `.metadata`), com o nome do campo extraído visível.
 
-## Observação para conferência antes da defesa
+## Observação sobre o percentil do P-16 — **resolvida**
 
-O campo `latency_p95_ms` de `autocannon-load.json` (P-16) é preenchido em `tests/load/load-services.mjs` com `r.latency.p97_5`, não com o p95 do autocannon. O valor de **253 ms** que aparece no print e no artigo é, portanto, o **p97,5** — mais conservador que o p95, e ainda muito abaixo do critério de 800 ms, de modo que o veredito do M-18 não muda. Convém alinhar o rótulo (no script ou no texto) antes da defesa.
+O campo `latency_p95_ms` de `autocannon-load.json` (P-16) é preenchido com `r.latency.p97_5`. O valor de **253 ms** que aparece no print é, portanto, o **p97,5**.
+
+A causa foi confirmada: o autocannon **não emite p95** no conjunto padrão de percentis de seu histograma — os vizinhos são p90 e p97,5. Não se tratava de erro de escolha, e sim de rótulo.
+
+O alinhamento foi feito (2026-08-20), sem re-medir:
+
+- `tests/load/load-services.mjs` passou a gravar `latency_p97_5_ms`, mantendo `latency_p95_ms` apenas quando a ferramenta de fato o fornecer;
+- o artigo e o [`registro-medicoes.md`](../../registro-medicoes.md) passaram a reportar "latência de cauda (p97,5)", explicitando que **p97,5 é mais exigente que o p95 do critério** — satisfeito o limiar em p97,5, está satisfeito em p95;
+- **o JSON de evidência não foi alterado**: ele é o registro da execução original e mantém o nome de campo daquela versão do script. A discrepância de rótulo fica documentada aqui, que é o lugar dela.
+
+O print P-16 continua válido: o número é o mesmo, e o veredito ("atende", critério de 800 ms) não muda.

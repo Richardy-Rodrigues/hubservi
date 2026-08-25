@@ -25,16 +25,35 @@ medicoes/
 
 ## Como reproduzir cada medição
 
-Todos os comandos são executados a partir da raiz do repositório, com `npm ci` previamente aplicado (o `package-lock.json` é o único *lockfile* válido — ver nota abaixo).
+**Reprodutibilidade aqui significa mesmo commit + mesmo ambiente**, não "mesmo comando hoje": a branch está à frente do estado medido, e rodar as ferramentas na árvore atual produz números legítimos, porém diferentes dos que o artigo reporta. Por isso a reprodução acontece em `git worktree` fixado no commit da coleta.
 
-| ID | O que mede | Comando |
-|----|-----------|---------|
-| M-01 | Cobertura de testes (linhas/ramos) | `npm run test:coverage` → lê `coverage/coverage-summary.json` |
-| M-02 | Violações de *lint* | `npx eslint . -f json -o <evidencias>/eslint-report.json` |
-| M-03 | Dependências circulares | `npx madge --circular --extensions ts,tsx src/` |
-| M-04+ | Segurança/RLS, desempenho, manutenibilidade avançada | a definir nas fases seguintes (Seções 5.2.1, 5.2.2, 5.2.4) |
+O roteiro completo — trilhas, tempos, pré-requisitos e o que **não** é reproduzível — está no [**Apêndice B**](../apendice-b-reproducao.md). Em resumo:
+
+| Comando | Medições | Requisitos | Tempo |
+|---|---|---|---|
+| `npm run repro` | *(lista as trilhas)* | — | — |
+| `npm run repro:offline` | M-01b, M-02, M-03, M-21, M-22, M-23, M-24 | Node + `npm ci` | ~1–2 min |
+| `npm run repro:baseline` | M-02, M-03 (Semana 1) | Node + `npm ci` | ~1–2 min |
+| `npm run repro:integracao` | M-04, M-05…M-13, M-26 | Docker + CLI Supabase | ~4–6 min |
+| `npm run repro:furos-antes` | F-02, F-03 (par antes/depois) | Docker + CLI Supabase | ~5–7 min |
+| `npm run repro:desempenho` | M-18…M-20 (+ Lighthouse manual) | Chrome; stack local | ~5–8 min |
+| `replay-evidencia.ps1 -All` | todas, a partir da evidência preservada | **nenhum** | instantâneo |
+
+Medições isoladas, na árvore atual (números **não** comparáveis aos do artigo):
+
+| ID | Comando |
+|----|---------|
+| M-01/M-01b | `npm run test:coverage` → lê `coverage/coverage-summary.json` |
+| M-02 | `npm run measure:lint` → grava em `evidencias/AAAA-MM-DD/` |
+| M-03 | `npm run measure:cycles` |
+| M-21 | `npm run measure:smells` |
+| M-22 | `npm run measure:dup` |
+| M-23/M-24 | `npx depcruise src --no-config --output-type metrics` |
+| M-25 | `npm run measure:sca` → grava em `evidencias/AAAA-MM-DD/` |
 
 Para registrar o ambiente de uma nova rodada, replicar o `ambiente.txt` da rodada anterior atualizando os valores — ele deve sempre conter o SHA de `git rev-parse HEAD`.
+
+> **Lição registrada.** As coletas de 2026-07-15 e 2026-07-16 correram sobre a árvore de trabalho, não sobre um commit — o que tornou **M-01 irreprodutível** e exigiu descobrir a posteriori a que commit cada coleta correspondia (ver o cabeçalho de [`registro-medicoes.md`](registro-medicoes.md)). Toda rodada futura deve partir de árvore limpa: `git status --porcelain` vazio antes de medir, e o SHA anotado no `ambiente.txt` sendo o do estado efetivamente medido.
 
 ## Prints de tela das execuções
 

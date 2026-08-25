@@ -43,3 +43,7 @@ supabase/.env
 
 .env
 .env_local
+
+# Worktrees temporarios criados por docs/tcc/medicoes/scripts/reproduzir.mjs
+# para reproduzir medicoes no commit em que foram coletadas.
+/.repro
