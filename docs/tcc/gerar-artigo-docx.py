@@ -40,6 +40,7 @@ from docx.shared import Emu, Pt
 RAIZ = Path(__file__).resolve().parents[2]
 ORIGEM = RAIZ / "docs" / "Artigo_PedroConrado_RichardyRodrigues.docx"
 SAIDA = RAIZ / "docs" / "Artigo_PedroConrado_RichardyRodrigues_ATUALIZADO.docx"
+SAIDA_APENDICE = RAIZ / "docs" / "Apendice_A_Diagramas.docx"
 
 FONTE = "Times New Roman"
 CORPO_PT = Pt(12)
@@ -47,6 +48,14 @@ TABELA_PT = Pt(10)
 RECUO = Emu(444500)  # recuo de primeira linha (~1,24 cm)
 
 FONTE_PADRAO = "Fonte: elaborado pelos autores (2026)."
+
+# Material suplementar publicado à parte — o artigo não leva apêndice.
+# A URL cita uma TAG do git, não uma branch: link de branch muda de conteúdo, e
+# referência acadêmica precisa apontar sempre para o mesmo estado do repositório.
+REPO_URL = "https://github.com/Richardy-Rodrigues/hubservi"
+TAG_TCC = "tcc-v1"
+APENDICE_A_URL = f"{REPO_URL}/blob/{TAG_TCC}/docs/tcc/apendice-a-diagramas.md"
+APENDICE_B_URL = f"{REPO_URL}/blob/{TAG_TCC}/docs/tcc/apendice-b-reproducao.md"
 
 _INLINE = re.compile(r"\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`", re.DOTALL)
 
@@ -92,6 +101,19 @@ class Artigo:
         self.i_imagem = 0
         self.n_tabela = 0
         self.n_figura = 0
+        # Prefixo da numeração de figuras e tabelas. Vazio no artigo ("Figura 1");
+        # "A." no apêndice publicado à parte ("Figura A.1"), cuja numeração precisa
+        # ser autocontida — inserir uma figura no corpo do artigo não pode deslocá-la.
+        self.prefixo = ""
+
+    def pular_imagens(self, n):
+        """Avança o cursor de imagens sem inserir nada.
+
+        O apêndice é gerado como documento próprio, mas suas imagens continuam vindo
+        da mesma origem, depois das do corpo do artigo. Sem isto, o gerador do apêndice
+        começaria pela imagem 1 e trocaria todas as legendas silenciosamente.
+        """
+        self.i_imagem += n
 
     def _esvaziar(self):
         corpo = self.doc.element.body
@@ -256,7 +278,7 @@ class Artigo:
         self.n_tabela += 1
         cap = self.doc.add_paragraph()
         cap.alignment = WD_ALIGN_PARAGRAPH.LEFT
-        self._runs_markdown(cap, f"Tabela {self.n_tabela} — {legenda}", bold_base=True)
+        self._runs_markdown(cap, f"Tabela {self.prefixo}{self.n_tabela} — {legenda}", bold_base=True)
 
         tbl = self.doc.add_table(rows=1, cols=len(cabecalho))
         tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -296,7 +318,7 @@ class Artigo:
 
         cap = self.doc.add_paragraph()
         cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        self._runs_markdown(cap, f"Figura {self.n_figura} — {legenda}", bold_base=True)
+        self._runs_markdown(cap, f"Figura {self.prefixo}{self.n_figura} — {legenda}", bold_base=True)
 
         img = self.doc.add_paragraph()
         img.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -359,7 +381,8 @@ def resumo(a):
         "O procedimento foi executado sobre ambiente reprodutível e emitiu vereditos por atributo "
         "e por camada: três defeitos reais de autorização e de integridade foram detectados, "
         "corrigidos e re-medidos; a confiabilidade atende aos critérios definidos; o *backend* "
-        "atende ao critério de desempenho, com latência p95 de 253 ms e 0% de erro sob carga, ao "
+        "atende ao critério de desempenho, com latência de cauda (p97,5) de 253 ms e 0% de erro "
+        "sob carga, ao "
         "passo que o carregamento inicial do *frontend* não o atinge, com LCP de 3,17 s após "
         "otimização, contra a meta de 2,5 s; e a manutenibilidade apresenta estrutura sólida, sem "
         "dependências circulares, com higiene de código abaixo do ideal. A capacidade de localizar "
@@ -390,7 +413,8 @@ def resumo(a):
         "static analysis, performance, and security. The procedure was executed on a reproducible "
         "environment and issued verdicts per attribute and per layer: three real authorization and "
         "integrity defects were detected, fixed, and re-measured; reliability meets the defined "
-        "criteria; the backend meets the performance criterion, with a p95 latency of 253 ms and a "
+        "criteria; the backend meets the performance criterion, with a tail latency (p97.5) of "
+        "253 ms and a "
         "0% error rate under load, whereas the initial frontend load does not, with an LCP of "
         "3.17 s after optimization against a 2.5 s target; and maintainability shows a sound "
         "structure, free of circular dependencies, with below-ideal code hygiene. The ability to "
@@ -562,8 +586,26 @@ def secao_1(a):
         "documenta a arquitetura da plataforma Hubservi. A Seção 5 detalha o planejamento "
         "experimental e o plano de métricas. A Seção 6 apresenta a avaliação arquitetural com base "
         "no ATAM. A Seção 7 consolida os resultados das medições executadas. A Seção 8 expõe o "
-        "cronograma. A Seção 9 apresenta a conclusão e, por fim, são listadas as referências. O "
-        "Apêndice A reúne os diagramas de modelagem."
+        "cronograma. A Seção 9 apresenta a conclusão e, por fim, são listadas as referências."
+    )
+
+    a.secao("1.8 Disponibilidade dos artefatos")
+    a.corpo(
+        "Todo o material que sustenta este trabalho é público e versionado, em coerência com a "
+        "própria tese do artigo: uma avaliação técnica só é verificável se o instrumento, o "
+        "procedimento e as evidências puderem ser inspecionados por terceiros. O repositório "
+        f"({REPO_URL}) reúne o código-fonte da plataforma, as *migrations* que definem o esquema e "
+        "as políticas de autorização, as suítes de teste, o registro completo das medições — com "
+        "ferramenta, versão, data, valor, critério e veredito — e as saídas brutas de cada execução."
+    )
+    a.corpo(
+        "Dois documentos são publicados como **material suplementar**, referenciados ao longo do "
+        "texto. O primeiro (VIEIRA; COSTA, 2026a) reúne os diagramas de modelagem — UML, BPMN e DER "
+        "— e o dicionário de dados, numerados de forma autocontida (Figuras A.1 a A.10 e Tabelas "
+        "A.1 a A.7). O segundo (VIEIRA; COSTA, 2026b) descreve como reproduzir cada medição "
+        "reportada na Seção 7, classificando-as pelo que exigem do ambiente e explicitando quais "
+        "**não** são reproduzíveis e por quê — informação que a Seção 5.4 trata como parte das "
+        "ameaças à validade, e não como omissão."
     )
 
 
@@ -789,7 +831,8 @@ def secao_3(a):
         "Os artefatos de modelagem, além de documentarem o instrumento, **atendem aos objetivos "
         "específicos 2 e 3** e constituem a base a partir da qual se derivam a árvore de utilidade "
         "do ATAM (Seção 6) e os cenários de avaliação (Seção 5) — ou seja, ligam a construção do "
-        "instrumento à avaliação propriamente dita. Encontram-se reproduzidos no Apêndice A."
+        "instrumento à avaliação propriamente dita. Encontram-se reproduzidos no material "
+        "suplementar (VIEIRA; COSTA, 2026a)."
     )
 
     a.secao("3.3 Etapas metodológicas")
@@ -805,7 +848,8 @@ def secao_3(a):
         "**Modelagem da arquitetura.** Recuperação e representação da arquitetura real a partir do "
         "código-fonte e das *migrations*, produzindo modelos UML (casos de uso, classes, "
         "sequência, componentes e implantação), modelo de processos de negócio (BPMN) e o modelo "
-        "de dados (DER e dicionário de dados). Os artefatos constam do Apêndice A.",
+        "de dados (DER e dicionário de dados). Os artefatos constam do material suplementar "
+        "(VIEIRA; COSTA, 2026a).",
         "**Documentação técnica.** Descrição dos componentes, fluxos, persistência e regras de "
         "negócio (Seção 4), assegurando rastreabilidade entre cada afirmação e sua fonte no "
         "repositório.",
@@ -907,8 +951,8 @@ def secao_4(a):
         ],
     )
     a.corpo(
-        "Os diagramas detalhados de componentes e de implantação constam do Apêndice A (Figuras 10 "
-        "e 11)."
+        "Os diagramas detalhados de componentes e de implantação constam do material suplementar "
+        "(VIEIRA; COSTA, 2026a, Figuras A.7 e A.8)."
     )
 
     a.secao("4.2 Tecnologias")
@@ -948,8 +992,8 @@ def secao_4(a):
         "conforme o tipo de usuário: `ClientDashboard` (cliente) ou `ProviderDashboard` "
         "(prestador). Provedores globais configurados na raiz incluem `QueryClientProvider` (cache "
         "e sincronização de dados), `AuthProvider` (sessão e perfil), `BrowserRouter` e provedores "
-        "de *feedback* de interface. Os diagramas de casos de uso e de classes constam do Apêndice "
-        "A (Figuras 5 e 6)."
+        "de *feedback* de interface. Os diagramas de casos de uso e de classes constam do material "
+        "suplementar (VIEIRA; COSTA, 2026a, Figuras A.2 e A.3)."
     )
 
     a.secao("4.4 Modelo de dados")
@@ -975,7 +1019,8 @@ def secao_4(a):
         "(cliente e prestador); `reviews` referencia `services` e `profiles` (cliente e "
         "prestador). A tabela `reviews` possui a restrição de unicidade (`service_id`, "
         "`client_id`), garantindo no máximo uma avaliação por cliente por serviço. O DER e o "
-        "dicionário de dados constam do Apêndice A."
+        "dicionário de dados constam do material suplementar (VIEIRA; COSTA, 2026a, Figura A.1 e "
+        "Tabelas A.1 a A.7)."
     )
 
     a.secao("4.5 Fluxos principais")
@@ -984,7 +1029,8 @@ def secao_4(a):
         "O cadastro (`Auth.tsx`) chama `supabase.auth.signUp`, fornecendo `full_name` e "
         "`user_type` em metadados. O *trigger* `on_auth_user_created` materializa, de forma "
         "idempotente, a linha correspondente em `profiles`. O `AuthContext` assina "
-        "`onAuthStateChange` e carrega o perfil do usuário autenticado (Apêndice A, Figura 7)."
+        "`onAuthStateChange` e carrega o perfil do usuário autenticado (VIEIRA; COSTA, 2026a, "
+        "Figura A.4)."
     )
     a.secao("4.5.2 Cadastro e busca de serviços")
     a.corpo(
@@ -1000,12 +1046,12 @@ def secao_4(a):
     a.corpo(
         "A solicitação (`BookingDialog`) insere um registro em `bookings` com `status = "
         "'pending'`. O cliente acompanha e pode cancelar solicitações pendentes; o prestador "
-        "aceita, rejeita, conclui ou cancela (Apêndice A, Figuras 8 e 12)."
+        "aceita, rejeita, conclui ou cancela (VIEIRA; COSTA, 2026a, Figuras A.5 e A.9)."
     )
     a.secao("4.5.4 Avaliação (review)")
     a.corpo(
         "Concluído um *booking*, o cliente pode registrar uma avaliação (nota de 1 a 5 e "
-        "comentário) pelo `ReviewForm` (Apêndice A, Figura 9)."
+        "comentário) pelo `ReviewForm` (VIEIRA; COSTA, 2026a, Figura A.6)."
     )
 
     a.secao("4.6 Regras de negócio residentes no banco")
@@ -1043,7 +1089,7 @@ def secao_4(a):
     a.corpo(
         "A máquina de estados do *booking* admite as transições `pending` para `accepted`, "
         "`rejected` ou `cancelled`, e `accepted` para `completed` ou `cancelled`; transições "
-        "inválidas resultam em exceção (Apêndice A, Figura 13)."
+        "inválidas resultam em exceção (VIEIRA; COSTA, 2026a, Figura A.10)."
     )
 
     a.secao("4.7 Segurança: autorização declarativa via RLS")
@@ -1193,8 +1239,16 @@ def secao_5(a):
     a.corpo(
         "O limiar de 800 ms para a latência p95, em aberto no planejamento inicial, foi calibrado "
         "antes da coleta definitiva a partir de uma execução exploratória de baixa intensidade (5 "
-        "conexões por 5 s, p95 aproximado de 57 ms) e da heurística de 1 s para a percepção de "
-        "fluidez pelo usuário, adotando-se margem conservadora."
+        "conexões por 5 s, latência de cauda aproximada de 57 ms) e da heurística de 1 s para a "
+        "percepção de fluidez pelo usuário, adotando-se margem conservadora."
+    )
+    a.corpo(
+        "**Percentil efetivamente reportado.** A ferramenta empregada (autocannon) não expõe o "
+        "p95 no conjunto padrão de percentis de seu histograma — os valores vizinhos são o p90 e "
+        "o p97,5. Os resultados de latência sob carga apresentados na Seção 7 são, portanto, de "
+        "**p97,5**, percentil mais exigente que o p95 fixado como critério: satisfeito o limiar "
+        "em p97,5, ele está necessariamente satisfeito em p95. Registra-se a diferença para que o "
+        "número publicado não prometa precisão superior à que o instrumento entrega."
     )
 
     a.secao("5.2.3 Testabilidade (subcaracterística de manutenibilidade)")
@@ -1471,7 +1525,10 @@ def secao_7(a):
     ])
 
     a.secao("7.2 Modelagem e documentação da arquitetura")
-    a.corpo("Foram produzidos e estão disponíveis em `docs/tcc/` e no Apêndice A deste artigo:")
+    a.corpo(
+        "Foram produzidos e estão disponíveis no repositório do trabalho, em `docs/tcc/`, e "
+        "reunidos no material suplementar (VIEIRA; COSTA, 2026a):"
+    )
     a.lista([
         "descrição técnica completa da arquitetura, componentes, fluxos, persistência e regras de "
         "negócio (Seção 4);",
@@ -1565,7 +1622,8 @@ def secao_7(a):
     a.corpo("Distinguem-se duas camadas:")
     a.lista([
         "**Backend sob carga (atende):** a listagem de serviços respondeu, sob 30 conexões "
-        "concorrentes por 20 s, com **latência p95 de 253 ms** (critério de 800 ms) e **0% de "
+        "concorrentes por 20 s, com **latência de cauda (p97,5) de 253 ms** (critério de 800 ms "
+        "em p95, portanto atendido com folga) e **0% de "
         "erro** em 44.413 requisições, a uma vazão aproximada de 2.221 requisições por segundo.",
         "**Frontend e carregamento inicial (não atende):** o Lighthouse (mediana de três "
         "execuções, perfil móvel com limitação de CPU e de rede) registrou *performance score* de "
@@ -1742,6 +1800,16 @@ def referencias(a):
          ": uma abordagem profissional. 8. ed. Porto Alegre: AMGH, 2016."),
         ("SOMMERVILLE, Ian. ", "Engenharia de software",
          ". 9. ed. São Paulo: Pearson Prentice Hall, 2011."),
+        # Material suplementar dos próprios autores: os diagramas e o protocolo de
+        # reprodução saíram do corpo do artigo e passaram a ser documentos citáveis.
+        ("VIEIRA, Pedro Conrado Fernandes; COSTA, Richardy Gabriel Rodrigues da. ",
+         "Apêndice A — Diagramas (UML, BPMN e DER) e dicionário de dados",
+         f": material suplementar. Franca: Uni-FACEF, 2026a. Disponível em: {APENDICE_A_URL}. "
+         "Acesso em: 20 ago. 2026."),
+        ("VIEIRA, Pedro Conrado Fernandes; COSTA, Richardy Gabriel Rodrigues da. ",
+         "Apêndice B — Reprodução das medições",
+         f": material suplementar. Franca: Uni-FACEF, 2026b. Disponível em: {APENDICE_B_URL}. "
+         "Acesso em: 20 ago. 2026."),
     ]
     for i, (antes, titulo, depois) in enumerate(entradas):
         if i:
@@ -1752,10 +1820,40 @@ def referencias(a):
 
 
 def apendice(a):
-    a.secao("Apêndice A — Diagramas (UML, BPMN e DER) e dicionário de dados", primaria=True)
+    """Conteúdo do Apêndice A — gerado como DOCUMENTO PRÓPRIO, não como seção do artigo.
+
+    O artigo não leva apêndice: os diagramas são artefatos do instrumento (a plataforma),
+    não resultados da avaliação (o objeto de pesquisa). Publicá-los à parte preserva essa
+    distinção e mantém o corpo do texto no tamanho de um artigo.
+
+    A numeração usa o prefixo "A." e é autocontida, de modo que inserir ou remover figuras
+    no corpo do artigo não desloque as referências cruzadas daqui.
+    """
+    a.prefixo = "A."
+    # As imagens vêm da mesma origem que as do artigo, depois das três do corpo
+    # (Figuras 1 a 3). Sem pular, o apêndice começaria pela imagem do corpo e trocaria
+    # todas as legendas em silêncio.
+    a.pular_imagens(3)
+
+    a.titulo_artigo("Apêndice A — Diagramas (UML, BPMN e DER) e dicionário de dados")
+    a.centro("MATERIAL SUPLEMENTAR")
+    a.vazio()
+    a.corpo(
+        "Material suplementar do artigo *Avaliação Técnica de uma Arquitetura Web baseada em "
+        "BaaS/Serverless para Intermediação de Serviços: um estudo de caso da plataforma "
+        "Hubservi*, de Pedro Conrado Fernandes Vieira e Richardy Gabriel Rodrigues da Costa, "
+        "sob orientação do Prof. Daniel Facciolo Pires (Uni-FACEF, 2026)."
+    )
     a.corpo(
         "Os diagramas a seguir foram recuperados do código-fonte e das *migrations*; o código de "
-        "diagramação que os origina está versionado em `docs/tcc/diagramas/`."
+        f"diagramação que os origina está versionado em `docs/tcc/diagramas/`, no repositório do "
+        f"trabalho ({REPO_URL}). A versão navegável deste documento, com os diagramas renderizados "
+        f"pelo próprio GitHub, está em {APENDICE_A_URL}."
+    )
+    a.corpo(
+        "O protocolo de reprodução das medições reportadas na Seção 7 do artigo — incluindo o que "
+        "não é reproduzível e por quê — está no Apêndice B (VIEIRA; COSTA, 2026b), disponível em "
+        f"{APENDICE_B_URL}."
     )
 
     diagramas = [
@@ -1897,6 +1995,7 @@ def apendice(a):
 
 
 def main():
+    # 1. O artigo — sem apêndice, terminando nas Referências.
     a = Artigo(ORIGEM)
     capa(a)
     resumo(a)
@@ -1910,10 +2009,24 @@ def main():
     secao_8(a)
     secao_9(a)
     referencias(a)
-    apendice(a)
     a.salvar(SAIDA)
     print(f"Gerado: {SAIDA}")
     print(f"  parágrafos: {len(a.doc.paragraphs)} | tabelas: {a.n_tabela} | figuras: {a.n_figura}")
+
+    # 2. O Apêndice A — documento próprio, com numeração A.x e as imagens 4 a 13.
+    b = Artigo(ORIGEM)
+    apendice(b)
+    b.salvar(SAIDA_APENDICE)
+    print(f"Gerado: {SAIDA_APENDICE}")
+    print(f"  parágrafos: {len(b.doc.paragraphs)} | tabelas: {b.n_tabela} | figuras: {b.n_figura}")
+
+    # O artigo consome as imagens 1 a 3 e o apêndice as 4 a 13; juntos, todas as 13.
+    # Um desencontro aqui significa legenda trocada em silêncio — daí a verificação.
+    if a.n_figura != 3 or b.n_figura != 10:
+        raise SystemExit(
+            f"Contagem inesperada de figuras: artigo={a.n_figura} (esperado 3), "
+            f"apêndice={b.n_figura} (esperado 10)."
+        )
 
 
 if __name__ == "__main__":
