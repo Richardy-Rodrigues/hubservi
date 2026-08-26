@@ -23,6 +23,8 @@ Para exportar de uma vez (Word/LaTeX), use [TCC-Hubservi.md](TCC-Hubservi.md) �
 | 9 | [08-cronograma.md](08-cronograma.md) | 8 Cronograma |
 | 10 | [09-referencias.md](09-referencias.md) | Referências |
 
+**Apoio à defesa:** [10-apresentacao.md](10-apresentacao.md) — roteiro dos 10 minutos para 2 apresentadores (cronometragem, falas por slide e perguntas prováveis da banca). Não faz parte do corpo do artigo. As medições e evidências ficam em [medicoes/](medicoes/).
+
 ## Diagramas (Mermaid)
 
 Em [diagramas/](diagramas/). Renderizam diretamente no GitHub e no preview de Markdown do VS Code.

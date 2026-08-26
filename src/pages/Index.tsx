@@ -32,7 +32,7 @@ export default function Index() {
       <section className="border-t bg-muted/30 py-20">
         <div className="container mx-auto px-4">
           <h2 className="mb-12 text-center text-2xl font-bold md:text-3xl">
-            Por que usar o ServiHub?
+            Por que usar o HubServi?
           </h2>
           <div className="grid gap-8 md:grid-cols-3">
             {[

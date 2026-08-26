@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
+import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
 import { loginSchema, registerSchema } from "@/lib/schemas/auth";
 
 export default function Auth() {
@@ -93,7 +94,7 @@ export default function Auth() {
       <div className="container mx-auto flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Bem-vindo ao ServiHub</CardTitle>
+            <CardTitle className="text-2xl">Bem-vindo ao HubServi</CardTitle>
             <CardDescription>Entre ou crie sua conta</CardDescription>
           </CardHeader>
           <CardContent>
@@ -128,6 +129,9 @@ export default function Auth() {
                       aria-invalid={!!errors.password}
                     />
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                  </div>
+                  <div className="flex justify-end">
+                    <ForgotPasswordDialog />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Entrando..." : "Entrar"}

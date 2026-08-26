@@ -18,10 +18,8 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="text-lg font-bold text-primary-foreground">S</span>
-          </div>
-          <span className="text-xl font-bold tracking-tight">ServiHub</span>
+          <img src="/favicon.svg" alt="" aria-hidden="true" className="h-9 w-9 rounded-lg" />
+          <span className="text-xl font-bold tracking-tight">HubServi</span>
         </Link>
 
         {/* Desktop nav */}

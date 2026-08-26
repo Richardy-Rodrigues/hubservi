@@ -15,5 +15,24 @@ export const registerSchema = z.object({
   userType: z.enum(["client", "provider"]),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email("E-mail inválido"),
+});
+
+// Usado na redefinicao de senha (/reset-password), depois que o link do e-mail
+// estabeleceu a sessao de recuperacao. A confirmacao e so de UI: o Supabase
+// recebe apenas `password`.
+export const newPasswordSchema = z
+  .object({
+    password: z.string().min(6, "Mínimo 6 caracteres"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type NewPasswordInput = z.infer<typeof newPasswordSchema>;

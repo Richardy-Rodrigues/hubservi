@@ -1,9 +1,17 @@
 // Teste de carga da listagem de servicos (§5.2.2). Alvo: endpoint PostgREST de
 // leitura publica de servicos ativos, exercitado como o cliente anonimo o faria.
-// Metrica: latencia p95, vazao (req/s), taxa de erro. Substitui k6 por autocannon
-// (ambos HTTP load testers; a substituicao esta registrada na metodologia).
+// Metricas: latencia de cauda, vazao (req/s), taxa de erro. Substitui k6 por
+// autocannon (ambos HTTP load testers; a substituicao esta registrada na metodologia).
+//
+// PERCENTIL REPORTADO (M-18). O autocannon nao emite p95 no conjunto padrao de
+// percentis do seu histograma — os vizinhos sao p90 e p97_5. O trabalho reporta
+// portanto o **p97,5**, que e MAIS CONSERVADOR que o p95 pedido pelo criterio de
+// §5.2.2: se p97,5 <= 800 ms, entao p95 <= 800 ms necessariamente. O campo abaixo
+// leva o nome do percentil que de fato contem, para que o rotulo nao prometa
+// mais precisao do que a ferramenta entrega.
 import autocannon from "autocannon";
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 const URL = process.env.SUPABASE_URL ?? "http://127.0.0.1:54321";
 const ANON =
@@ -23,6 +31,13 @@ const instance = autocannon({
 
 autocannon.track(instance, { renderProgressBar: false });
 
+// Uma nova execucao e uma nova rodada de coleta, e vai para o diretorio do dia
+// (regra 4 do protocolo em docs/tcc/medicoes/README.md). Escrever no diretorio de
+// 2026-07-16, como esta versao fazia, SOBRESCREVERIA a evidencia que o artigo cita.
+const hoje = new Date().toISOString().slice(0, 10);
+const destino =
+  process.env.EVID_DIR ?? join("docs", "tcc", "medicoes", "evidencias", hoje);
+
 instance.on("done", (r) => {
   const out = {
     mode,
@@ -31,14 +46,19 @@ instance.on("done", (r) => {
     requests_total: r.requests.total,
     rps_mean: r.requests.mean,
     latency_p50_ms: r.latency.p50,
-    latency_p95_ms: r.latency.p97_5 ?? r.latency.p95,
+    latency_p90_ms: r.latency.p90,
+    // Percentil de cauda efetivamente reportado — ver nota no topo do arquivo.
+    latency_p97_5_ms: r.latency.p97_5,
+    // Presente apenas se a versao do autocannon expuser p95; nulo caso contrario.
+    latency_p95_ms: r.latency.p95 ?? null,
     latency_p99_ms: r.latency.p99,
     latency_max_ms: r.latency.max,
     non2xx: r.non2xx,
     errors: r.errors,
     timeouts: r.timeouts,
   };
-  const path = `docs/tcc/medicoes/evidencias/2026-07-16/autocannon-${mode}.json`;
+  const path = join(destino, `autocannon-${mode}.json`);
+  mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, JSON.stringify(out, null, 2));
   console.log(JSON.stringify(out, null, 2));
   console.log(`-> ${path}`);

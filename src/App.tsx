@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 // rotas sao carregadas sob demanda (code-splitting) para reduzir o bundle inicial
 // e o tempo ate a primeira renderizacao. Ver docs/tcc/medicoes (desempenho).
 const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Services = lazy(() => import("./pages/Services"));
 const ServiceDetail = lazy(() => import("./pages/ServiceDetail"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -30,6 +31,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/services" element={<Services />} />
               <Route path="/services/:id" element={<ServiceDetail />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
