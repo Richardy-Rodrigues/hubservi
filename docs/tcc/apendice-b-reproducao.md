@@ -100,6 +100,30 @@ Eles rodam contra o PostgREST real, com clientes autenticados por papel — não
 
 > ⚠️ **Isto apaga os dados de domínio do stack local** (`reviews`, `bookings`, `services`) antes de cada arquivo de teste. Usuários e categorias são preservados. Não afeta nenhum ambiente remoto.
 
+### Nota — por que não rodar contra o Supabase online
+
+A suíte de integração **só roda contra o stack local**, e há uma trava que impede o contrário.
+
+O motivo é `resetDomainData()`, chamada no `beforeEach` da maioria dos arquivos: ela faz `DELETE` incondicional em `reviews`, `bookings` e `services` via `service_role`, ignorando RLS. Contra um projeto gerenciado, isso apaga os dados reais — sem filtro e sem desfazer. O `setup.ts` ainda criaria quatro usuários de teste no Auth daquele projeto.
+
+Isso não é limitação acidental: os testes **precisam** de um banco descartável, porque montam o cenário do zero a cada caso (é o que permite afirmar "0 acessos indevidos" sem depender de dados preexistentes).
+
+Se o alvo for mesmo um projeto **criado só para teste**, o opt-in é explícito:
+
+```bash
+PERMITIR_ALVO_REMOTO=sim npm run test:integration
+```
+
+O que **pode** ser medido contra a instância online, sem risco:
+
+| Medição | Comando | Observação |
+|---|---|---|
+| M-14…M-17 (Lighthouse) | `npx lighthouse <url-de-producao>` | **Mais representativo** que o local: mede o host real, com CSP, HSTS e CDN |
+| M-18…M-20 (carga, leitura) | `SUPABASE_URL=<url> npm run load:run` | Somente leitura. Atenção aos limites de taxa do plano gratuito |
+| M-25 (`npm audit`) | `npm run measure:sca` | Não depende de Supabase |
+
+A Seção 5.4 do artigo já declara como ameaça à validade que a medição de carga correu contra o stack local — sem latência de rede real nem limites de plano gerenciado. Rodar o Lighthouse contra a URL de produção **fortalece** o trabalho: é o dado que falta, e é o mesmo motivo pelo qual o DAST ficou pendente.
+
 ### 6. Teste de carga (opcional)
 
 Com o stack de pé:
