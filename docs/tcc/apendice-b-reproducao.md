@@ -12,7 +12,17 @@ Orientador: Prof. Daniel Facciolo Pires
 
 Se um avaliador pedir, durante a defesa, *"rode esse teste agora"* — o que é possível executar ao vivo, quanto tempo leva, e o que **não** é reproduzível e por quê.
 
-A resposta curta: **das 26 medições (M-01…M-26) e 3 achados (F-01…F-03), 24 são reproduzíveis ao vivo**; 3 têm restrições declaradas e 1 não é reproduzível por nenhum meio. Todas as exceções estão nomeadas na seção [O que não reproduz](#o-que-não-reproduz), com a razão técnica.
+São **30 itens** registrados: 27 medições (M-01, M-01b, M-02…M-26) e 3 achados (F-01…F-03). Nem todos se comportam igual, e a distinção importa mais que o total:
+
+| | Quantos | O que significa |
+|---|---|---|
+| **Devolvem o número idêntico ao do artigo** | **22** | M-01b, M-02…M-13, M-19, M-21…M-24, M-26, F-01…F-03 |
+| **Devolvem o veredito, não o número exato** | **7** | M-14…M-18, M-20, M-25 — variância de execução ou base de dados viva |
+| **Não reproduz por nenhum meio** | **1** | M-01 (cobertura do *baseline*, 18,03%) |
+
+Ou seja: **29 dos 30 rodam no terminal**; destes, 22 batem número a número com a Seção 7. Some-se a isso o DAST (OWASP ZAP), que nunca chegou a ser executado — decisão registrada, não um item pendente de execução.
+
+Todas as exceções estão nomeadas em [O que não reproduz](#o-que-não-reproduz), com a razão técnica de cada uma.
 
 Nenhuma medição depende de conta paga, chave de API ou serviço proprietário — as substituições k6 → autocannon e Snyk → `npm audit` foram feitas justamente para eliminar essa dependência (Seção 5.3 do artigo).
 
@@ -299,11 +309,22 @@ O `npm audit` consulta o **banco de advisories do registry npm, que é um servi�
 npm run measure:sca     # grava em evidencias/AAAA-MM-DD/, não sobrescreve a evidência do artigo
 ```
 
-### 3. M-14…M-17 — Lighthouse · **reproduz a faixa e o veredito, não o valor exato**
+### 3. M-14…M-18 e M-20 — medições de tempo · **reproduzem a faixa e o veredito, não o valor exato**
 
-O Lighthouse tem variância inerente entre execuções — foi por isso que o protocolo fixou **três execuções com reporte da mediana**. Uma execução isolada pode dar ±3 pontos de *score* e ±0,3 s de LCP.
+Toda medição cronometrada depende da máquina, da carga do sistema no instante e do agendamento do sistema operacional. Nenhuma delas volta com o mesmo número duas vezes, e isso vale para os dois conjuntos:
 
-O que reproduz de forma estável é o que sustenta a conclusão: **score na casa dos 85–88 e LCP acima de 3 s, ambos abaixo da meta** (≥ 90 e ≤ 2,5 s). O veredito "não atende" é robusto à variância; o "88" não é.
+- **Lighthouse (M-14…M-17).** Variância inerente entre execuções — foi por isso que o protocolo fixou **três execuções com reporte da mediana**. Uma execução isolada pode dar ±3 pontos de *score* e ±0,3 s de LCP.
+- **autocannon (M-18, latência de cauda; M-20, vazão).** Mesma natureza: 253 ms e ≈2.221 req/s são o resultado de *uma* execução em *uma* máquina. Em outra, ou com o Docker sob carga, os números mudam.
+
+O que reproduz de forma estável é justamente o que sustenta as conclusões:
+
+| Conclusão do artigo | Robusta à variância? |
+|---|---|
+| Frontend **não atende** (score < 90, LCP > 2,5 s) | Sim — a distância até a meta é grande |
+| Backend **atende** (latência de cauda ≪ 800 ms) | Sim — 253 ms está a um terço do limiar |
+| "score 88", "253 ms", "2.221 req/s" | Não — são valores de uma execução |
+
+**M-19 (taxa de erro 0%) é a exceção do grupo**: não é uma medida de tempo, e reproduz como valor.
 
 ### 4. DAST / OWASP ZAP · **nunca executado**
 
