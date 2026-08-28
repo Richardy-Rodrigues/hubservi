@@ -1,0 +1,1128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Conteúdo dos slides — Defesa TCC Hubservi</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+
+  :root{
+    --tinta:#16191d;
+    --suave:#5a6270;
+    --linha:#d6dae0;
+    --tela:#0f4c81;
+    --fala:#7a4b12;
+    --fonte:#8a5a9e;
+    --marca:#f2f5f8;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    font-family:"Segoe UI","Calibri",Arial,sans-serif;
+    color:var(--tinta);
+    font-size:10.2pt;
+    line-height:1.45;
+    margin:0;
+  }
+
+  /* ---------- capa do documento ---------- */
+  .capa{ text-align:center; padding:22mm 6mm 10mm; break-after:page; }
+  .capa .inst{ font-size:10pt; letter-spacing:.14em; text-transform:uppercase; color:var(--suave); }
+  .capa h1{ font-size:19pt; line-height:1.28; margin:12mm 0 3mm; font-weight:700; }
+  .capa h2{ font-size:12.5pt; font-weight:600; color:var(--suave); margin:0 0 14mm; }
+  .capa .quem{ font-size:11pt; line-height:1.7; }
+  .capa .quem b{ font-weight:600; }
+  .capa .selo{
+    margin:16mm auto 0; max-width:150mm; padding:6mm 8mm;
+    background:var(--marca); border:1px solid var(--linha); border-radius:3mm;
+    text-align:left; font-size:9.6pt; line-height:1.6;
+  }
+  .capa .selo h3{ margin:0 0 3mm; font-size:10.5pt; letter-spacing:.06em; text-transform:uppercase; color:var(--tela); }
+
+  /* ---------- sumário / cronometragem ---------- */
+  .secao{ break-before:page; }
+  h2.tit{
+    font-size:13pt; margin:0 0 4mm; padding-bottom:2mm;
+    border-bottom:2px solid var(--tela); color:var(--tela);
+    letter-spacing:.02em;
+  }
+  h3.subtit{ font-size:11pt; margin:7mm 0 3mm; color:var(--tinta); }
+
+  table.grade{ width:100%; border-collapse:collapse; font-size:9.2pt; margin-bottom:4mm; }
+  table.grade th{
+    background:var(--marca); text-align:left; padding:1.6mm 2mm;
+    border-bottom:1.4px solid var(--tela); font-weight:600; font-size:8.8pt;
+    text-transform:uppercase; letter-spacing:.05em; color:var(--tela);
+  }
+  table.grade td{ padding:1.5mm 2mm; border-bottom:.6px solid var(--linha); vertical-align:top; }
+  table.grade td.num{ text-align:center; width:8mm; color:var(--suave); font-variant-numeric:tabular-nums; }
+  table.grade td.t{ text-align:right; width:14mm; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  table.grade td.ac{ text-align:right; width:16mm; font-variant-numeric:tabular-nums; color:var(--suave); white-space:nowrap; }
+  table.grade td.q{ width:20mm; }
+  table.grade tr.hand td{ background:#fff8e6; font-weight:600; text-align:center; letter-spacing:.08em; font-size:8.6pt; }
+
+  /* ---------- bloco de slide ---------- */
+  .slide{
+    break-inside:avoid;
+    margin:0 0 6mm;
+    padding:0 0 4mm;
+    border-bottom:.8px dashed var(--linha);
+  }
+  .slide:last-child{ border-bottom:none; }
+
+  .cab{ display:flex; align-items:baseline; gap:3mm; margin-bottom:2.5mm; }
+  .cab .n{
+    flex:0 0 auto; background:var(--tela); color:#fff; font-weight:700;
+    font-size:9pt; padding:1mm 2.6mm; border-radius:1.2mm; letter-spacing:.04em;
+    white-space:nowrap;
+  }
+  .cab .nome{ flex:1 1 auto; font-size:12pt; font-weight:700; line-height:1.25; }
+  .cab .meta{
+    flex:0 0 auto; font-size:8.4pt; color:var(--suave); text-align:right;
+    white-space:nowrap; font-variant-numeric:tabular-nums;
+  }
+
+  .bloco{ margin:0 0 2.5mm; }
+  .rot{
+    font-size:8.2pt; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+    margin-bottom:1.2mm;
+  }
+  .rot.tela{ color:var(--tela); }
+  .rot.fala{ color:var(--fala); }
+
+  ul.tela{ margin:0; padding-left:5.5mm; }
+  ul.tela li{ margin-bottom:1mm; }
+  ul.tela ul{ margin:.8mm 0 0; padding-left:5mm; list-style:"– "; color:var(--suave); font-size:9.4pt; }
+
+  .fala{
+    border-left:2.5px solid #e0b878; background:#fdf9f2;
+    padding:2.2mm 3mm; margin:0; font-size:9.6pt; line-height:1.5;
+  }
+  .fala p{ margin:0 0 1.8mm; }
+  .fala p:last-child{ margin-bottom:0; }
+
+  .fonte{
+    font-size:8.2pt; color:var(--fonte); margin-top:2mm;
+    letter-spacing:.02em;
+  }
+  .fonte b{ letter-spacing:.1em; text-transform:uppercase; font-size:7.8pt; font-weight:700; }
+
+  .visual{
+    font-size:8.8pt; color:var(--suave); background:var(--marca);
+    padding:1.8mm 2.6mm; border-radius:1.2mm; margin:0 0 2.5mm;
+  }
+  .visual b{ letter-spacing:.1em; text-transform:uppercase; font-size:7.8pt; color:var(--tinta); }
+
+  .handoff{
+    break-inside:avoid; text-align:center; margin:6mm 0 7mm; padding:3mm;
+    background:#fff8e6; border:1px dashed #d9b45f; border-radius:2mm;
+    font-weight:700; letter-spacing:.1em; text-transform:uppercase; font-size:9.5pt;
+  }
+  .handoff span{ display:block; font-weight:400; letter-spacing:0; text-transform:none; font-size:9pt; color:var(--suave); margin-top:1.5mm; }
+
+  code, .mono{ font-family:Consolas,"Courier New",monospace; font-size:9pt; background:#eef1f4; padding:.3mm 1mm; border-radius:.8mm; }
+  .destaque{ background:#fff1a8; padding:0 .8mm; }
+  b.ok{ color:#1a6b3c; }
+  b.nao{ color:#a52121; }
+</style>
+</head>
+<body>
+
+<!-- ============ CAPA ============ -->
+<div class="capa">
+  <div class="inst">Centro Universitário Municipal de Franca — Uni-FACEF</div>
+  <div class="inst" style="margin-top:2mm">Engenharia de Software · Trabalho de Conclusão de Curso</div>
+
+  <h1>Avaliação Técnica de uma Arquitetura Web baseada em<br>BaaS/Serverless para Intermediação de Serviços</h1>
+  <h2>Um estudo de caso da plataforma Hubservi</h2>
+
+  <div class="quem">
+    <b>Pedro Conrado Fernandes Vieira</b><br>
+    <b>Richardy Gabriel Rodrigues da Costa</b><br>
+    <span style="color:var(--suave)">Orientador: Prof. Daniel Facciolo Pires</span>
+  </div>
+
+  <div class="selo">
+    <h3>O que é este documento</h3>
+    <p style="margin:0 0 3mm">Conteúdo <b>slide a slide</b> para a defesa oral, extraído do artigo
+    <i>Artigo_PedroConrado_RichardyRodrigues_ATUALIZADO</i>. Para cada slide:</p>
+    <p style="margin:0 0 2mm"><b style="color:var(--tela)">NA TELA</b> — os bullets curtos que devem ir no slide, prontos para colar.</p>
+    <p style="margin:0 0 2mm"><b style="color:var(--fala)">FALA</b> — o roteiro do que dizer, no tom de quem apresenta.</p>
+    <p style="margin:0 0 2mm"><b style="color:var(--fonte)">FONTE NO ARTIGO</b> — seção e tabela de origem, para conferência e para responder à banca.</p>
+    <p style="margin:3mm 0 0"><b>Formato:</b> 22 slides · 18 minutos · 2 apresentadores · 5 slides reserva para o Q&amp;A.</p>
+    <p style="margin:2mm 0 0; color:var(--suave)">A montagem visual e a estilização ficam por sua conta — aqui está apenas o conteúdo.</p>
+  </div>
+</div>
+
+<!-- ============ CRONOMETRAGEM ============ -->
+<div class="secao">
+  <h2 class="tit">Divisão e cronometragem</h2>
+
+  <p style="margin:0 0 4mm; font-size:9.6pt">
+    Meta de <b>18:00</b>, com folga dentro da faixa de 15–20 minutos. Um único <i>handoff</i>,
+    após o slide 11. <b>Regra de ouro:</b> se estiver atrasando, corte detalhe dos slides 7, 8 e 12;
+    <span class="destaque">nunca corte os slides 6, 18 e 21</span> — são o escopo, o achado central e a
+    resposta à questão de pesquisa.
+  </p>
+
+  <table class="grade">
+    <thead>
+      <tr><th>#</th><th>Slide</th><th class="q">Quem</th><th style="text-align:right">Tempo</th><th style="text-align:right">Acum.</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="num">1</td><td>Capa</td><td class="q">Pedro</td><td class="t">0:20</td><td class="ac">0:20</td></tr>
+      <tr><td class="num">2</td><td>Agenda</td><td class="q">Pedro</td><td class="t">0:25</td><td class="ac">0:45</td></tr>
+      <tr><td class="num">3</td><td>Contexto: intermediação de serviços e a ascensão do BaaS/Serverless</td><td class="q">Pedro</td><td class="t">0:50</td><td class="ac">1:35</td></tr>
+      <tr><td class="num">4</td><td>O problema: a qualidade migra para configuração declarativa</td><td class="q">Pedro</td><td class="t">1:00</td><td class="ac">2:35</td></tr>
+      <tr><td class="num">5</td><td>Questão de pesquisa e objetivos</td><td class="q">Pedro</td><td class="t">0:50</td><td class="ac">3:25</td></tr>
+      <tr><td class="num">6</td><td><b>Objeto × instrumento</b> — por que construímos o sistema</td><td class="q">Pedro</td><td class="t">1:05</td><td class="ac">4:30</td></tr>
+      <tr><td class="num">7</td><td>Referencial I: arquitetura, atributos de qualidade e ATAM</td><td class="q">Pedro</td><td class="t">0:55</td><td class="ac">5:25</td></tr>
+      <tr><td class="num">8</td><td>Referencial II: ISO/IEC 25010 e o paradigma BaaS</td><td class="q">Pedro</td><td class="t">0:55</td><td class="ac">6:20</td></tr>
+      <tr><td class="num">9</td><td>Metodologia: classificação e as seis etapas</td><td class="q">Pedro</td><td class="t">0:55</td><td class="ac">7:15</td></tr>
+      <tr><td class="num">10</td><td>Ferramentas e o ciclo medir → detectar → corrigir → re-medir</td><td class="q">Pedro</td><td class="t">0:55</td><td class="ac">8:10</td></tr>
+      <tr><td class="num">11</td><td>Arquitetura do Hubservi: SPA + BaaS + Serverless</td><td class="q">Pedro</td><td class="t">0:55</td><td class="ac">9:05</td></tr>
+      <tr class="hand"><td colspan="5">handoff — Pedro → Richardy</td></tr>
+      <tr><td class="num">12</td><td>Modelo de dados e regras de negócio no banco</td><td class="q">Richardy</td><td class="t">0:50</td><td class="ac">9:55</td></tr>
+      <tr><td class="num">13</td><td>Autorização declarativa via RLS</td><td class="q">Richardy</td><td class="t">0:50</td><td class="ac">10:45</td></tr>
+      <tr><td class="num">14</td><td>Planejamento experimental: atributo → cenário → métrica → critério</td><td class="q">Richardy</td><td class="t">0:55</td><td class="ac">11:40</td></tr>
+      <tr><td class="num">15</td><td>ATAM: árvore de utilidade e cenários priorizados</td><td class="q">Richardy</td><td class="t">0:55</td><td class="ac">12:35</td></tr>
+      <tr><td class="num">16</td><td>ATAM: sensibilidade, compromissos e riscos</td><td class="q">Richardy</td><td class="t">0:50</td><td class="ac">13:25</td></tr>
+      <tr><td class="num">17</td><td>Achado 1 — reprodutibilidade: as migrations não reconstroem o sistema</td><td class="q">Richardy</td><td class="t">0:50</td><td class="ac">14:15</td></tr>
+      <tr><td class="num">18</td><td><b>Achado 2 — segurança: dois defeitos reais</b></td><td class="q">Richardy</td><td class="t">1:20</td><td class="ac">15:35</td></tr>
+      <tr><td class="num">19</td><td>Confiabilidade e testabilidade</td><td class="q">Richardy</td><td class="t">0:55</td><td class="ac">16:30</td></tr>
+      <tr><td class="num">20</td><td>Desempenho e manutenibilidade</td><td class="q">Richardy</td><td class="t">1:05</td><td class="ac">17:35</td></tr>
+      <tr><td class="num">21</td><td>Síntese por atributo e resposta à questão de pesquisa</td><td class="q">Richardy</td><td class="t">0:55</td><td class="ac">18:30</td></tr>
+      <tr><td class="num">22</td><td>Conclusão, limitações e trabalhos futuros · Perguntas</td><td class="q">ambos</td><td class="t">0:50</td><td class="ac">19:20</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin:0; font-size:9.2pt; color:var(--suave)">
+    O total fecha em <b>19:20</b> — dentro da faixa de 15–20 minutos, mas perto do teto. Duas formas
+    de ganhar folga, ambas sem perder nenhum resultado:
+    <b>(a)</b> fundir os slides <b>7+8</b> em um só de referencial e os <b>12+13</b> em um só de
+    arquitetura interna, economizando cerca de <b>1:45</b> e fechando em <b>17:35</b>;
+    <b>(b)</b> no slide 22, deixar limitações e trabalhos futuros só na tela e falar apenas a
+    contribuição, economizando <b>0:20</b>. Se a banca for rígida em 15 minutos, aplique as duas.
+  </p>
+</div>
+
+<!-- ============ BLOCO A ============ -->
+<div class="secao">
+  <h2 class="tit">Bloco A — Pedro Conrado · slides 1 a 11</h2>
+
+  <!-- SLIDE 1 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 1</span><span class="nome">Capa</span><span class="meta">Pedro · 0:20 · acum. 0:20</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Avaliação Técnica de uma Arquitetura Web baseada em BaaS/Serverless para Intermediação de Serviços</b></li>
+        <li>Um estudo de caso da plataforma Hubservi</li>
+        <li>Pedro Conrado Fernandes Vieira · Richardy Gabriel Rodrigues da Costa</li>
+        <li>Orientador: Prof. Daniel Facciolo Pires — Uni-FACEF · 2026</li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — só o título, os nomes e a marca da instituição. Sem imagem de fundo concorrendo com o texto.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Bom dia. Somos Pedro e Richardy, e nosso trabalho avalia tecnicamente uma arquitetura web
+        baseada em BaaS e Serverless. Nos próximos minutos vamos mostrar <i>como</i> se avalia esse tipo
+        de arquitetura — e o que encontramos quando aplicamos o método a um sistema real."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · folha de rosto</div>
+  </div>
+
+  <!-- SLIDE 2 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 2</span><span class="nome">Agenda</span><span class="meta">Pedro · 0:25 · acum. 0:45</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li>1 · O problema e a questão de pesquisa</li>
+        <li>2 · Referencial: ISO/IEC 25010 e ATAM</li>
+        <li>3 · Metodologia e o objeto avaliado</li>
+        <li>4 · A arquitetura do Hubservi</li>
+        <li>5 · O procedimento de avaliação</li>
+        <li>6 · <b>Resultados</b> — o que a avaliação encontrou</li>
+        <li>7 · Contribuição e conclusão</li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — numeração vertical simples. Destaque visual no item 6, que é o núcleo da defesa.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"O caminho é este: começamos pelo problema e pela questão de pesquisa, passamos rapidamente
+        pelo referencial e pela metodologia, mostramos a arquitetura avaliada e o procedimento que
+        construímos — e o maior tempo fica nos resultados, que é onde o trabalho se prova."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §1.7 Organização do artigo</div>
+  </div>
+
+  <!-- SLIDE 3 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 3</span><span class="nome">Contexto: a ascensão do BaaS/Serverless</span><span class="meta">Pedro · 0:50 · acum. 1:35</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li>Intermediação de serviços migrou para plataformas digitais — dados pessoais e transações entre desconhecidos</li>
+        <li><b>Serverless</b>: provisão, escala e manutenção de servidores delegadas ao provedor</li>
+        <li><b>BaaS</b>: autenticação, banco, storage e autorização como serviços gerenciados, consumidos direto pelo cliente</li>
+        <li>No Supabase: PostgreSQL + <b>Row Level Security</b> + views + triggers</li>
+        <li>Resultado: <span class="destaque">some a camada de servidor de aplicação própria</span></li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — dois blocos lado a lado: à esquerda, arquitetura tradicional (Cliente → Servidor de aplicação → Banco); à direita, BaaS (Cliente → BaaS/Banco com RLS). A seta que some é o argumento inteiro.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"O modelo de desenvolvimento web foi reconfigurado pela popularização do BaaS e do
+        serverless. Responsabilidades que antes ficavam em um servidor próprio — autenticação,
+        persistência, autorização — passam a ser serviços gerenciados, acessados diretamente pelo
+        navegador."</p>
+        <p>"No Supabase, isso se concretiza sobre um PostgreSQL: a autorização vira <i>Row Level
+        Security</i>, política declarativa avaliada pelo próprio banco a cada operação. Repare no que
+        desaparece do desenho: o servidor de aplicação intermediário. E é exatamente esse
+        desaparecimento que cria o problema do nosso trabalho."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §1.1 Contexto; §2.4 Arquiteturas BaaS e Serverless</div>
+  </div>
+
+  <!-- SLIDE 4 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 4</span><span class="nome">O problema: a qualidade migra para configuração declarativa</span><span class="meta">Pedro · 1:00 · acum. 2:35</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li>Sem servidor próprio, <b>segurança e confiabilidade</b> passam a viver em:
+          <ul><li>políticas de RLS</li><li>triggers e restrições de integridade</li><li>a fronteira cliente ↔ serviço gerenciado</li></ul>
+        </li>
+        <li>Muda <b>o que</b> testar, <b>onde</b> estão os pontos de falha e <b>como</b> medir</li>
+        <li>Falha de RLS <span class="destaque">não gera erro funcional aparente</span> — a tela continua funcionando</li>
+        <li><b>Lacuna:</b> ATAM e ISO/IEC 25010 foram concebidos supondo servidor de aplicação explícito</li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"O problema é que essa simplificação tem um custo escondido. Atributos de qualidade
+        críticos — segurança e confiabilidade acima de tudo — deixam de ser código e viram
+        <i>configuração declarativa</i>. E configuração errada não quebra a aplicação: a tela continua
+        funcionando normalmente enquanto o dado vaza."</p>
+        <p>"Some-se a isso que os métodos clássicos de avaliação arquitetural — o ATAM, a ISO 25010 —
+        foram pensados sob o pressuposto de que existe uma camada de servidor de aplicação. Existe,
+        portanto, uma lacuna prática: não é evidente como aplicar métricas e testes de Engenharia de
+        Software para validar esses atributos nesse novo arranjo."</p>
+        <p><b>Enunciado do problema, se quiser ler:</b> "Equipes de desenvolvimento têm dificuldade em
+        validar tecnicamente se uma arquitetura baseada em BaaS e Serverless atende aos atributos de
+        qualidade esperados."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §1.2 Problema de pesquisa; §1.6 Justificativa; §2.4</div>
+  </div>
+
+  <!-- SLIDE 5 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 5</span><span class="nome">Questão de pesquisa e objetivos</span><span class="meta">Pedro · 0:50 · acum. 3:25</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Questão:</b> Como avaliar tecnicamente uma arquitetura web baseada em BaaS/Serverless por meio de métricas e testes de Engenharia de Software, considerando atributos de qualidade?</li>
+        <li><b>Objetivo geral:</b> avaliar tecnicamente a arquitetura do Hubservi (React, TypeScript, Supabase, PostgreSQL)</li>
+        <li><b>Nove objetivos específicos</b>, em três frentes:
+          <ul>
+            <li>OE1–OE4 — identificar atributos, modelar, documentar, definir cenários</li>
+            <li>OE5–OE8 — executar testes, análise estática, segurança e desempenho</li>
+            <li>OE9 — analisar os resultados</li>
+          </ul>
+        </li>
+        <li>Todos os nove <b class="ok">executados</b> — reportados na Seção 7</li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Daí decorre a questão de pesquisa, que é uma pergunta de <i>como</i>, não de <i>quanto</i>:
+        como avaliar tecnicamente uma arquitetura BaaS/Serverless por meio de métricas e testes de
+        Engenharia de Software."</p>
+        <p>"O objetivo geral é aplicar essa avaliação à plataforma Hubservi. Os nove objetivos
+        específicos se organizam em três frentes — modelar e definir cenários; executar as medições;
+        e analisar. Registro desde já que os nove foram executados, inclusive antecipando o
+        cronograma original, e os resultados estão na Seção 7 do artigo."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §1.3 Questão de pesquisa; §1.4 Objetivos; nota de escopo em §1.4.2</div>
+  </div>
+
+  <!-- SLIDE 6 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 6</span><span class="nome">Objeto × instrumento — por que construímos o sistema</span><span class="meta">Pedro · 1:05 · acum. 4:30</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Objeto de pesquisa</b> = a <span class="destaque">avaliação</span> da arquitetura → é a contribuição científica</li>
+        <li><b>Instrumento</b> = a plataforma Hubservi → é o meio, não o fim</li>
+        <li>Por que desenvolver o sistema? Avaliar RLS, triggers e a fronteira cliente–banco exige acesso irrestrito a código, schema, configuração e ambiente — <b>impossível sobre plataforma de terceiros</b></li>
+        <li>É o que garante a <b>validade interna</b>: controlar o ambiente, reproduzir sobre estado conhecido, corrigir defeitos sem restrição</li>
+        <li><b>Fora do escopo:</b> usabilidade e acessibilidade · módulo de recomendação · microsserviços · E2E por automação de navegador</li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — dois cartões contrastados: "OBJETO — a avaliação" em destaque forte, "INSTRUMENTO — o Hubservi" em tom secundário. A hierarquia visual precisa dizer sozinha qual dos dois é a pesquisa.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Este slide é o que evita o mal-entendido mais comum sobre o nosso trabalho. Existem dois
+        produtos aqui, de naturezas diferentes: um sistema de software, que desenvolvemos
+        integralmente, e um procedimento de avaliação, aplicado sobre esse sistema. <b>Só o segundo é a
+        contribuição científica.</b>"</p>
+        <p>"Então por que construir o sistema? Porque avaliar políticas de RLS, triggers e a fronteira
+        entre cliente e serviço gerenciado exige acesso irrestrito ao código-fonte, ao esquema do
+        banco e ao ambiente de execução. Isso é inviável sobre uma plataforma de terceiros. O
+        desenvolvimento próprio não é o objetivo do trabalho — é pré-requisito metodológico dele, e é
+        o que assegura a validade interna do experimento."</p>
+        <p>"E delimitamos negativamente: usabilidade e acessibilidade ficam fora, porque estão fora
+        das quatro características da 25010 que selecionamos; recomendação ficou como módulo
+        secundário; e não avaliamos microsserviços, porque o sistema simplesmente não os tem."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §1.5 Delimitação do escopo (objeto e instrumento; justificativa do desenvolvimento; delimitação negativa)</div>
+  </div>
+
+  <!-- SLIDE 7 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 7</span><span class="nome">Referencial I: arquitetura, atributos de qualidade e ATAM</span><span class="meta">Pedro · 0:55 · acum. 5:25</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Bass, Clements e Kazman (2012)</b> — a arquitetura é o artefato que viabiliza ou inibe os atributos de qualidade</li>
+        <li>Cenário de atributo de qualidade em <b>seis partes</b>: fonte · estímulo · artefato · ambiente · resposta · medida</li>
+        <li><b>ATAM</b> (Clements, Kazman e Klein, 2002) — avaliação por cenários; não dá nota, identifica:
+          <ul>
+            <li><b>ponto de sensibilidade</b> — propriedade crítica para um atributo</li>
+            <li><b>ponto de compromisso</b> — sensível a mais de um atributo; melhorar um degrada outro</li>
+            <li><b>riscos e não riscos</b></li>
+          </ul>
+        </li>
+        <li>Organizado por uma <b>árvore de utilidade</b> com cenários priorizados</li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Dois referenciais sustentam o método. O primeiro é Bass, Clements e Kazman: a arquitetura
+        é o artefato em que os atributos de qualidade se tornam analisáveis, e esses atributos se
+        expressam por cenários estruturados em seis partes. Essa estrutura é o que nos permitiu
+        transformar 'o sistema é seguro' em algo verificável."</p>
+        <p>"O segundo é o ATAM. O ponto importante do ATAM é que ele <i>não</i> atribui notas: ele
+        identifica riscos, pontos de sensibilidade e pontos de compromisso. Ele é especialmente
+        adequado aqui porque arquiteturas BaaS são feitas de compromissos explícitos — você troca
+        controle por simplicidade, e alguém precisa dizer o que se perdeu na troca."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §2.1 Arquitetura e atributos de qualidade; §2.2 Avaliação arquitetural e ATAM</div>
+  </div>
+
+  <!-- SLIDE 8 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 8</span><span class="nome">Referencial II: ISO/IEC 25010 e o paradigma BaaS</span><span class="meta">Pedro · 0:55 · acum. 6:20</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>ISO/IEC 25010 (2011)</b>, família SQuaRE — 8 características de qualidade de produto</li>
+        <li>Quatro selecionadas para este trabalho:
+          <ul>
+            <li><b>Segurança</b> — confidencialidade, integridade, autenticidade</li>
+            <li><b>Eficiência de desempenho</b> — comportamento temporal, capacidade</li>
+            <li><b>Manutenibilidade</b> — modularidade, analisabilidade, <b>testabilidade</b></li>
+            <li><b>Confiabilidade</b> — maturidade, tolerância a falhas</li>
+          </ul>
+        </li>
+        <li>Testabilidade é subcaracterística da manutenibilidade — <b>destacada</b> por ser condição para verificar as demais</li>
+        <li>Implicações do BaaS: autorização vira superfície declarativa · desempenho percebido vai para o cliente · testar exige alcançar o banco</li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"A ISO 25010 fornece a taxonomia. Das oito características do modelo, selecionamos quatro
+        como relevantes ao problema: segurança, eficiência de desempenho, manutenibilidade e
+        confiabilidade. Cada métrica que coletamos está rastreada a uma delas — não há métrica solta
+        no trabalho."</p>
+        <p>"Uma observação: na norma, testabilidade é subcaracterística de manutenibilidade. Nós a
+        tratamos como dimensão destacada, porque ela é condição de possibilidade para verificar todos
+        os outros atributos. Se você não consegue testar, não consegue avaliar nada."</p>
+        <p>"E o paradigma BaaS traz três implicações diretas para a avaliação: a autorização vira uma
+        superfície declarativa que precisa ser testada explicitamente; parte do desempenho percebido
+        se desloca para o carregamento do cliente; e a testabilidade passa a depender de conseguir
+        testar as regras que moram dentro do banco."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §2.3 ISO/IEC 25010; §2.4 implicações arquiteturais; §2.5 testes e análise estática</div>
+  </div>
+
+  <!-- SLIDE 9 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 9</span><span class="nome">Metodologia: classificação e as seis etapas</span><span class="meta">Pedro · 0:55 · acum. 7:15</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Natureza</b> aplicada · <b>Abordagem</b> mista · <b>Objetivos</b> exploratórios e descritivos · <b>Procedimento</b> estudo de caso com experimento técnico</li>
+        <li>Seis etapas:
+          <ul>
+            <li>1 · Levantar requisitos arquiteturais e atributos de qualidade (ASR)</li>
+            <li>2 · Modelar a arquitetura real — a partir do código e das migrations</li>
+            <li>3 · Documentar componentes, fluxos, persistência e regras</li>
+            <li>4 · Definir cenários — árvore de utilidade ATAM + plano de métricas</li>
+            <li>5 · <b>Executar</b> — testes, análise estática, segurança, desempenho</li>
+            <li>6 · Analisar em face dos critérios e dos tradeoffs</li>
+          </ul>
+        </li>
+        <li>Ambiente: instância <b>Supabase local em contêiner</b> — reprodutível e isolado de produção</li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"A pesquisa é aplicada, de abordagem mista, exploratória e descritiva, conduzida como
+        estudo de caso combinado a experimento técnico. Mista porque combina métricas objetivas —
+        cobertura, latência, complexidade — com a análise qualitativa das decisões arquiteturais via
+        ATAM."</p>
+        <p>"A execução se organiza em seis etapas. Chamo atenção para a etapa 2: a arquitetura não foi
+        <i>projetada</i> no papel e depois avaliada; ela foi <b>recuperada do código-fonte e das
+        migrations</b>, para que a modelagem representasse o sistema real e não uma intenção. E toda a
+        medição de banco e de API ocorreu contra uma instância Supabase local em contêiner — nunca
+        contra dados de produção."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §3.1 Classificação (Tabela 1); §3.3 Etapas metodológicas; §5.4 Ambiente</div>
+  </div>
+
+  <!-- SLIDE 10 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 10</span><span class="nome">Ferramentas e o ciclo medir → detectar → corrigir → re-medir</span><span class="meta">Pedro · 0:55 · acum. 8:10</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Testes</b> Vitest + React Testing Library · integração contra a API PostgREST</li>
+        <li><b>Análise estática</b> ESLint · eslint-plugin-sonarjs · jscpd · Madge · dependency-cruiser</li>
+        <li><b>Desempenho</b> Lighthouse (carregamento) · autocannon (carga)</li>
+        <li><b>Segurança</b> testes de RLS por papel · npm audit · supabase db lint · <i>OWASP ZAP pendente</i></li>
+        <li>Substituições registradas: SonarQube → sonarjs/jscpd · k6/JMeter → autocannon · Snyk → npm audit</li>
+        <li><b>Ciclo adotado:</b> medir → detectar → corrigir → <b>re-medir</b>, reportando o par antes/depois</li>
+        <li><b>Regra anti-fabricação:</b> nenhum valor sem evidência arquivada; resultado desfavorável registrado com o mesmo rigor</li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — o ciclo de quatro caixas em círculo ocupando metade do slide; as ferramentas em lista compacta na outra metade.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"As ferramentas estão organizadas por atributo. Onde a ferramenta prevista no plano não
+        estava disponível no ambiente — porque exigia conta ou serviço externo — trocamos por um
+        substituto da mesma classe, medindo as mesmas métricas, e registramos cada troca. Nada foi
+        silenciosamente abandonado."</p>
+        <p>"Mas o ponto metodológico mais importante deste slide é o ciclo. Adotamos <b>medir, detectar,
+        corrigir e re-medir</b>, preservando os dois estados como evidência. A razão é direta: um
+        conjunto de cenários que aprovasse o sistema já na primeira execução não demonstraria
+        qualidade — demonstraria fraqueza dos cenários."</p>
+        <p>"E vale como declaração à banca: toda medição registra ferramenta, versão, ambiente,
+        configuração, data, valor e veredito, com o artefato bruto arquivado. Nenhum número que
+        vocês vão ver existe sem evidência associada."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §3.4 Instrumentos; §3.5 Procedimentos de análise (regra anti-fabricação); §5.3 Tabela 12</div>
+  </div>
+
+  <!-- SLIDE 11 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 11</span><span class="nome">A arquitetura do Hubservi</span><span class="meta">Pedro · 0:55 · acum. 9:05</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li>Estilo <b>SPA + BaaS + Serverless</b> — sem servidor de aplicação próprio, sem microsserviços</li>
+        <li>Quatro camadas lógicas:
+          <ul>
+            <li><b>Apresentação</b> — <span class="mono">src/pages/</span>, <span class="mono">src/components/</span></li>
+            <li><b>Aplicação</b> — AuthContext, React Query, schemas Zod</li>
+            <li><b>Integração</b> — <span class="mono">src/integrations/supabase/</span></li>
+            <li><b>Dados</b> — <span class="mono">supabase/migrations/</span> (PostgreSQL)</li>
+          </ul>
+        </li>
+        <li>Stack: React 18.3 · TypeScript 5.8 · Vite 5.4 · React Query 5.83 · supabase-js 2.98</li>
+        <li>Quatro fluxos críticos: <b>autenticação · serviços · booking · review</b></li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — usar a Figura 1 do artigo (camadas lógicas). É o slide mais visual do bloco A; deixe o diagrama grande e os bullets curtos.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"O Hubservi adota o estilo SPA + BaaS + Serverless. O SPA roda no navegador e conversa
+        diretamente com o Supabase, que provê autenticação, o PostgreSQL e a autorização declarativa
+        por RLS. Não há servidor de aplicação intermediário e não há microsserviços — e isso corrige,
+        inclusive, uma incoerência documental anterior do próprio projeto, que mencionava
+        microsserviços inexistentes."</p>
+        <p>"São quatro camadas lógicas, cada uma com elementos identificáveis no repositório, e quatro
+        fluxos críticos: autenticação, cadastro e busca de serviços, contratação e avaliação. São
+        esses quatro fluxos que a avaliação vai exercitar."</p>
+        <p><b>Handoff:</b> "A partir daqui, o Richardy apresenta como avaliamos essa arquitetura e o que
+        encontramos."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §4.1 Visão geral (Figura 1, Tabela 2); §4.2 Tecnologias (Tabela 3); §4.5 Fluxos</div>
+  </div>
+
+  <div class="handoff">handoff — Pedro → Richardy
+    <span>Combine o gesto: Pedro devolve o controle do slide e senta. Uma frase só, sem "agora vou passar para o meu colega que vai falar sobre…".</span>
+  </div>
+</div>
+
+<!-- ============ BLOCO B ============ -->
+<div class="secao">
+  <h2 class="tit">Bloco B — Richardy Rodrigues · slides 12 a 22</h2>
+
+  <!-- SLIDE 12 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 12</span><span class="nome">Regras de negócio dentro do banco</span><span class="meta">Richardy · 0:50 · acum. 9:55</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li>Esquema: <b>5 tabelas</b> (profiles, categories, services, bookings, reviews) · <b>3 enums</b> · <b>2 views</b></li>
+        <li>Views: <span class="mono">service_stats</span> (contagem e média de avaliações) · <span class="mono">public_profiles</span> (perfil <b>sem PII</b>)</li>
+        <li>Invariantes impostas por <b>trigger</b>, não pelo cliente:
+          <ul>
+            <li>provisão automática de perfil no cadastro (idempotente)</li>
+            <li>máquina de estados do booking</li>
+            <li>imutabilidade do <span class="mono">user_type</span> — anti-escalonamento</li>
+            <li><span class="mono">booking.provider_id</span> = dono do serviço</li>
+          </ul>
+        </li>
+        <li>Máquina de estados: <span class="mono">pending → accepted | rejected | cancelled</span> · <span class="mono">accepted → completed | cancelled</span></li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Antes dos resultados, é preciso ver <i>onde</i> mora a regra de negócio nessa arquitetura.
+        O esquema tem cinco tabelas, três enumerações e duas views. E boa parte das invariantes do
+        domínio é imposta no servidor, por triggers e restrições — não no cliente. Essa é a marca do
+        paradigma BaaS."</p>
+        <p>"Por exemplo: o tipo de usuário é imutável por trigger, o que impede escalonamento de
+        privilégio; o prestador de um booking tem que coincidir com o dono do serviço; e a máquina de
+        estados do booking rejeita qualquer transição fora do desenho. Guardem esses mecanismos —
+        eles reaparecem nos resultados, tanto no que funcionou quanto no que faltava."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §4.4 Modelo de dados; §4.6 Regras no banco (Tabela 5)</div>
+  </div>
+
+  <!-- SLIDE 13 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 13</span><span class="nome">Autorização declarativa via RLS</span><span class="meta">Richardy · 0:50 · acum. 10:45</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Todas</b> as tabelas com RLS habilitado — política avaliada pelo PostgreSQL a cada operação</li>
+        <li><span class="mono">profiles</span> — cada usuário lê e edita apenas o próprio registro; contraparte vem de <span class="mono">public_profiles</span></li>
+        <li><span class="mono">services</span> — todos veem os ativos; só o prestador dono altera</li>
+        <li><span class="mono">bookings</span> — cliente e prestador veem os próprios; só o cliente insere; cliente cancela apenas os pendentes</li>
+        <li><span class="mono">reviews</span> — inserção só com booking <span class="mono">completed</span>; edição só pelo autor</li>
+        <li><span class="destaque">Toda a autorização concentrada em um único mecanismo declarativo</span></li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — a Tabela 6 do artigo, reduzida a tabela/operação/política. Se ficar densa, mostre só profiles, bookings e reviews.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Toda a autorização do sistema é declarativa. Não existe um <span class="mono">if</span> em
+        JavaScript decidindo quem pode ler o quê: existe uma política SQL que o PostgreSQL avalia a
+        cada operação."</p>
+        <p>"Isso é elegante e é consistente — qualquer caminho de acesso passa pela mesma regra. Mas
+        concentra toda a correção da segurança em um único mecanismo. Uma política ausente ou mal
+        escrita compromete o sistema inteiro sem produzir nenhum erro visível. É precisamente esse o
+        ponto que a nossa avaliação de segurança foi construída para exercitar."</p>
+        <p><i>(Se quiser antecipar tensão para o slide 18:)</i> "E adianto: a tabela que vocês estão
+        vendo já está no estado <b>posterior</b> às correções."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §4.7 Segurança: autorização declarativa via RLS (Tabela 6); §4.8 Síntese arquitetural</div>
+  </div>
+
+  <!-- SLIDE 14 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 14</span><span class="nome">O procedimento de medição</span><span class="meta">Richardy · 0:55 · acum. 11:40</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li>Para cada atributo: <b>cenário → métrica → critério → ferramenta → coleta → veredito</b></li>
+        <li>Critérios <b>fixados antes da coleta</b> — são metas de planejamento, não resultados</li>
+        <li>Cenários definidos: <b>7</b> de segurança · <b>4</b> de desempenho · <b>3</b> de testabilidade · <b>4</b> de manutenibilidade · <b>3</b> de confiabilidade</li>
+        <li>Exemplos de critério: 0 acessos indevidos · p95 ≤ 800 ms e erro &lt; 1% · LCP ≤ 2,5 s e score ≥ 90 · duplicação ≤ 3% · 0 dependências circulares</li>
+        <li>Cada execução registra ferramenta, versão, ambiente, configuração, data, valor e veredito</li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — a Figura 2 do artigo (fluxo do procedimento) como faixa horizontal no topo, e abaixo dois ou três exemplos de linha das Tabelas 7 a 11.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Cada atributo da 25010 foi decomposto em cenários mensuráveis. Para cada cenário definimos
+        a métrica, o critério de aceitação e a ferramenta — e isso foi fixado <b>antes</b> de medir
+        qualquer coisa. Esse detalhe importa: somos a própria equipe desenvolvedora avaliando o
+        próprio sistema, e fixar critério antes da coleta é o que impede acomodar a meta ao resultado."</p>
+        <p>"Um único limiar ficou em aberto no planejamento, o de latência. Ele foi calibrado antes da
+        coleta definitiva, a partir de uma execução exploratória de baixa intensidade e da heurística
+        de um segundo para percepção de fluidez, adotando margem conservadora — chegamos a 800
+        milissegundos."</p>
+        <p>"Vale registrar também um refinamento honesto: o cenário de exposição de dados pessoais
+        originalmente considerava só o usuário anônimo. Ao inspecionar as políticas vigentes, vimos
+        que ele passaria sem exercitar o perfil de acesso mais permissivo que de fato existia.
+        Ampliamos o cenário para incluir o usuário autenticado não relacionado — porque um cenário
+        incapaz de reprovar o sistema não é instrumento de medição."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §5.1 Visão geral (Figura 2); §5.2 Tabelas 7 a 11; nota de refinamento em §5.2.1</div>
+  </div>
+
+  <!-- SLIDE 15 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 15</span><span class="nome">ATAM: árvore de utilidade e cenários priorizados</span><span class="meta">Richardy · 0:55 · acum. 12:35</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li>Árvore decompõe: utilidade → atributos → refinamentos → cenários, rotulados por <b>(importância, risco)</b> em A/M/B</li>
+        <li>Dez cenários priorizados:
+          <ul>
+            <li><b>CS-1</b> isolamento de dados por RLS <b>(A, A)</b> · <b>CS-2</b> anti-escalonamento (A, M) · <b>CS-3</b> não exposição de PII (A, M)</li>
+            <li><b>CD-1</b> carregamento da SPA (M, M) · <b>CD-2</b> busca sob carga (A, M)</li>
+            <li><b>CM-1</b> complexidade e duplicação (M, B) · <b>CM-2</b> sem ciclos (M, B)</li>
+            <li><b>CC-1</b> máquina de estados (A, M) · <b>CC-2</b> integridade em cascata (A, B)</li>
+            <li><b>CT-1</b> cobertura dos fluxos críticos (M, M)</li>
+          </ul>
+        </li>
+        <li>Formato de seis partes — ex. <b>CS-3</b>: fonte visitante/autenticado não relacionado · estímulo leitura de perfil · artefato <span class="mono">public_profiles</span> + RLS · resposta só campos não sensíveis · <b>medida 0 ocorrências de email ou phone</b></li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — a Figura 3 (árvore de utilidade). Se não couber legível, mostre só os três ramos de segurança e cite os demais.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"O ATAM entra para organizar a análise qualitativa. A árvore de utilidade decompõe a
+        utilidade geral do sistema até chegar em cenários, cada um rotulado por importância para o
+        negócio e risco arquitetural."</p>
+        <p>"Dez cenários foram priorizados. Só um recebeu <b>alto em ambos os eixos</b>: o CS-1,
+        isolamento de dados por RLS — e vocês vão ver, nos resultados, que era exatamente ali que os
+        defeitos estavam."</p>
+        <p>"Cada cenário é especificado em seis partes. No CS-3, por exemplo: a fonte é um visitante
+        ou um usuário autenticado não relacionado; o estímulo é ler dados de perfil; o artefato é a
+        view <span class="mono">public_profiles</span> e a RLS de profiles; e a medida é zero
+        ocorrências de e-mail ou telefone expostos. É isso que torna 'ser seguro' uma afirmação
+        falseável."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §6.2 Árvore de utilidade (Figura 3); §6.3 Cenários em seis partes</div>
+  </div>
+
+  <!-- SLIDE 16 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 16</span><span class="nome">ATAM: sensibilidade, compromissos e riscos</span><span class="meta">Richardy · 0:50 · acum. 13:25</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Sensibilidade</b> — a segurança depende inteiramente da completude e exatidão das políticas de RLS e triggers; uma política ausente compromete CS-1 e CS-3 <b>sem erro funcional aparente</b></li>
+        <li><b>Sensibilidade</b> — o desempenho de CD-2 depende da eficiência da view <span class="mono">service_stats</span> e da indexação</li>
+        <li><b>Compromisso</b> — delegar autorização ao banco favorece simplicidade e consistência, mas concentra o risco em um único mecanismo e desloca o teste para a fronteira cliente–banco</li>
+        <li><b>Compromisso</b> — o SPA acelera o desenvolvimento, porém transfere ao cliente o desempenho percebido</li>
+        <li><b>Risco</b> — carregamento inicial não atinge a meta (confirmado em §7.3.5)</li>
+        <li><b class="ok">Não risco</b> — imutabilidade de <span class="mono">user_type</span> e validação de <span class="mono">provider_id</span> dão defesa em profundidade</li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Da análise qualitativa saíram dois pontos de sensibilidade, dois pontos de compromisso, um
+        risco e um não risco. Destaco o primeiro ponto de sensibilidade, porque ele foi <b>confirmado
+        empiricamente</b> pelas medições: a correção da segurança é altamente sensível à completude das
+        políticas, e uma política mal especificada não gera erro visível."</p>
+        <p>"E os dois compromissos são a assinatura do paradigma: você ganha simplicidade delegando
+        autorização ao banco, mas concentra o risco; ganha velocidade com o SPA, mas paga no
+        desempenho percebido pelo usuário. Nos próximos slides, as medições dizem quanto se pagou em
+        cada um."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §6.4 Pontos de sensibilidade, de compromisso e riscos (Tabela 13)</div>
+  </div>
+
+  <!-- SLIDE 17 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 17</span><span class="nome">Achado 1 — as migrations não reconstroem o sistema</span><span class="meta">Richardy · 0:50 · acum. 14:15</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li>Ao reconstruir o banco <b>só a partir das migrations versionadas</b>, o sistema não funcionava</li>
+        <li>Faltavam os <b>grants</b> de privilégio de API aos papéis <span class="mono">anon</span>, <span class="mono">authenticated</span> e <span class="mono">service_role</span> no schema <span class="mono">public</span></li>
+        <li>Resultado: <span class="mono">permission denied</span> <b>antes mesmo</b> de a RLS ser avaliada</li>
+        <li>Funciona em produção porque esses privilégios foram aplicados <b>fora do controle de versão</b></li>
+        <li>Corrigido por migration que torna o histórico auto-suficiente — sem alterar políticas de segurança</li>
+        <li><span class="destaque">Achado característico do BaaS: parte da configuração vive no serviço gerenciado e escapa ao versionamento</span></li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"O primeiro achado não estava previsto em nenhum cenário — ele apareceu porque insistimos
+        em montar um ambiente limpo e reprodutível."</p>
+        <p>"Ao reconstruir o banco apenas a partir das migrations versionadas, o sistema não subia:
+        faltavam os <i>grants</i> de privilégio de API aos papéis do Supabase. O erro era
+        <span class="mono">permission denied</span>, e ele acontecia <b>antes</b> de qualquer política de
+        RLS ser avaliada."</p>
+        <p>"O sistema funciona em produção porque alguém aplicou esses privilégios manualmente, pelo
+        painel, fora do versionamento. Ou seja: o repositório não era capaz de reconstruir o sistema
+        do zero, e ninguém sabia disso."</p>
+        <p>"Este é um achado <b>característico do paradigma</b>: em BaaS, parte da configuração vive no
+        serviço gerenciado e escapa ao controle de versão. E ele só se revela sob uma avaliação
+        conduzida em ambiente limpo — o que é, em si, um argumento a favor do método."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §7.3.1 Achado transversal de reprodutibilidade</div>
+  </div>
+
+  <!-- SLIDE 18 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 18</span><span class="nome">Achado 2 — segurança: dois defeitos reais</span><span class="meta">Richardy · 1:20 · acum. 15:35</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Defeito 1 — PII exposta a qualquer usuário autenticado</b><br>
+          política de leitura de <span class="mono">profiles</span> usava <span class="mono">USING (auth.uid() IS NOT NULL)</span> → qualquer logado lia <b>email e telefone de todos</b><br>
+          <b>Correção:</b> leitura direta restrita ao próprio registro; contraparte via <span class="mono">public_profiles</span></li>
+        <li><b>Defeito 2 — avaliação atribuída a prestador incorreto</b><br>
+          a política de inserção de <span class="mono">reviews</span> não validava <span class="mono">provider_id</span> contra o dono do serviço — assimetria em relação a bookings, que já tinham o trigger<br>
+          <b>Correção:</b> trigger de validação espelhado</li>
+        <li><b class="ok">Após correção e re-medição: 0 acessos indevidos</b> — 30 testes de integração em 9 arquivos</li>
+        <li>Dependências (npm audit): 12 alta · 8 moderada · <b>0 crítica</b>; apenas <b>1 de produção</b> (react-router-dom, XSS via open redirect, com correção disponível)</li>
+        <li><span class="mono">supabase db lint</span> sem erros de schema · <b>DAST (OWASP ZAP) pendente</b>, depende da URL de produção</li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — este é o slide-chave. Mostre o antes/depois da política em bloco de código: vermelho para <span class="mono">USING (auth.uid() IS NOT NULL)</span>, verde para <span class="mono">USING (auth.uid() = id)</span>. Uma imagem vale mais que os bullets aqui.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Este é o coração da defesa. A avaliação de segurança encontrou <b>dois defeitos reais de
+        autorização</b> — e os dois foram corrigidos e re-medidos."</p>
+        <p>"O primeiro: a política de leitura da tabela de perfis dizia <span class="mono">USING auth.uid()
+        IS NOT NULL</span>. Traduzindo: 'qualquer usuário autenticado pode ler'. Na prática, qualquer
+        pessoa com uma conta na plataforma conseguia ler e-mail e telefone de <b>todos</b> os usuários.
+        Isso nunca apareceu como bug, porque a interface simplesmente não mostrava esses campos — mas
+        a API devolvia."</p>
+        <p>"O segundo: a inserção de avaliações não validava que o prestador informado era o dono do
+        serviço. Curiosamente, bookings já tinham esse trigger; reviews não. Era uma assimetria — o
+        tipo de defeito que a revisão de código não pega porque cada política, isolada, parece
+        correta."</p>
+        <p>"Depois das correções, a suíte de segurança passa integralmente: <b>zero acessos indevidos</b>
+        nos cenários testados, em 30 testes de integração distribuídos por nove arquivos, cobrindo
+        isolamento de perfis, de serviços e de bookings, bloqueio de escalonamento e as regras de
+        review."</p>
+        <p>"Nas dependências, o npm audit reportou 12 vulnerabilidades altas e 8 moderadas, nenhuma
+        crítica. Dessas, <b>apenas uma é de produção</b> — no react-router-dom, com correção disponível.
+        As demais são ferramentas de build, sem superfície de ataque em produção. E registro a única
+        medição pendente do trabalho: a varredura dinâmica com OWASP ZAP, que depende da publicação
+        da URL de produção."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §7.3.2 Segurança; §4.7 (estado posterior à correção); §9 Conclusão</div>
+  </div>
+
+  <!-- SLIDE 19 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 19</span><span class="nome">Confiabilidade e testabilidade</span><span class="meta">Richardy · 0:55 · acum. 16:30</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b class="ok">Confiabilidade — atende</b>
+          <ul>
+            <li>máquina de estados do booking: <b>0 transições inválidas aceitas</b></li>
+            <li>integridade referencial em cascata: <b>0 registros órfãos</b></li>
+            <li>fluxo crítico ponta a ponta (autenticação → serviço → booking → review): sucesso</li>
+          </ul>
+        </li>
+        <li><b>Testabilidade — evoluiu</b>
+          <ul>
+            <li>suíte ampliada de <b>11 para 44</b> testes unitários e de componente, mais 30 de integração</li>
+            <li>cobertura de linhas: <b>18,0% → 32,0%</b> no agregado</li>
+            <li>módulos críticos: <b>82% a 100%</b> (auth, formulários, acesso a dados, schemas)</li>
+            <li>limiar antes em aberto foi fechado: piso de <b>30% global</b> e <b>75% nos críticos</b>, verificado automaticamente</li>
+            <li>factory de mock compartilhada reduziu o esforço de escrever novos testes</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Na confiabilidade, os três cenários atendem: a máquina de estados rejeita toda transição
+        inválida, a exclusão em cascata não deixa órfãos e o fluxo crítico completo funciona no caso
+        válido."</p>
+        <p>"Na testabilidade, o número que importa não é a cobertura agregada — é a distribuição. A
+        suíte foi de 11 para 44 testes de unidade e componente, mais 30 de integração, e a cobertura
+        subiu de 18 para 32 por cento. Trinta e dois por cento parece pouco, e é pouco se olhado como
+        média. Mas essa cobertura está <b>concentrada nos módulos críticos</b>, que ficaram entre 82 e
+        100 por cento: contexto de autenticação, formulários, camada de acesso a dados e schemas de
+        validação."</p>
+        <p>"Dois pontos metodológicos aqui. Primeiro: o limiar de cobertura estava em aberto no
+        planejamento e foi fechado na execução, em 30 por cento global e 75 nos críticos, com os
+        módulos enumerados nominalmente e verificados de forma automática — é um piso
+        anti-regressão, não um alvo. Segundo: introduzimos uma factory de mock compartilhada, que
+        reduziu o custo de escrever cada novo teste. Isso é evidência direta de que a testabilidade,
+        que é o atributo sob avaliação, de fato melhorou."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §7.3.3 Confiabilidade; §7.3.4 Testabilidade; §5.2.3 Tabela 9</div>
+  </div>
+
+  <!-- SLIDE 20 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 20</span><span class="nome">Desempenho e manutenibilidade</span><span class="meta">Richardy · 1:05 · acum. 17:35</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b class="ok">Backend sob carga — atende</b><br>
+          p95 de <b>253 ms</b> (critério 800 ms) · <b>0% de erro</b> em <b>44.413 requisições</b> · ~<b>2.221 req/s</b> · 30 conexões concorrentes por 20 s</li>
+        <li><b class="nao">Frontend, carregamento inicial — não atende</b><br>
+          diagnóstico: bundle único de <b>679 KB</b>, rotas carregadas de forma <i>eager</i><br>
+          ação: <b>code-splitting por rota</b> → bundle inicial <b>489 KB</b> (−28%)<br>
+          score <b>85 → 88</b> (meta 90) · LCP <b>3,49 s → 3,17 s</b> (meta 2,5 s) · TBT 11 ms → <b>0 ms</b> · CLS <b>0,000</b></li>
+        <li><b>Manutenibilidade — estrutura sólida, higiene abaixo do ideal</b><br>
+          <b class="ok">0 dependências circulares</b>, confirmado por duas ferramentas independentes (Madge/85 arquivos, dependency-cruiser/93 módulos)<br>
+          lint não zerado: <b>19 violações</b> (25 sob configuração recomendada), incluindo complexidade ciclomática elevada<br>
+          duplicação de <b>4,55%</b> na interface (meta 3%) — causa localizada: <b>61 linhas</b> quase idênticas entre os painéis de cliente e de prestador</li>
+        <li><span class="destaque">O gargalo de desempenho está no frontend, não no backend</span></li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — duas barras comparativas resolvem: p95 253 ms contra a linha de 800 ms (folgado), e LCP 3,17 s contra a linha de 2,5 s (estourado). O contraste visual entrega o argumento sem você precisar dizer.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Em desempenho, o resultado só faz sentido se separado por camada — e é aí que está a
+        lição."</p>
+        <p>"O backend atende com folga: sob 30 conexões concorrentes por 20 segundos, a listagem de
+        serviços respondeu com p95 de <b>253 milissegundos</b> contra um critério de 800, com <b>zero por
+        cento de erro</b> em mais de 44 mil requisições, a cerca de 2.200 requisições por segundo."</p>
+        <p>"O carregamento inicial do frontend <b>não atende</b>. O Lighthouse, na mediana de três
+        execuções em perfil móvel, deu score 85 e LCP de 3,49 segundos. Diagnosticamos um bundle
+        único de 679 KB com todas as rotas carregadas de uma vez, aplicamos code-splitting por rota e
+        reduzimos o bundle inicial em 28 por cento. Melhorou — score 88 e LCP 3,17 — mas
+        <b>continua abaixo da meta de 2,5 segundos</b>. Estamos reportando isso como reprovação, não
+        como progresso."</p>
+        <p>"E esse contraste é o achado: a API é rápida, o carregamento é lento. Isso <b>localiza</b> o
+        gargalo no peso do bundle e confirma quantitativamente o ponto de compromisso que o ATAM
+        tinha identificado de forma qualitativa — o SPA transfere ao cliente parte do desempenho
+        percebido."</p>
+        <p>"Na manutenibilidade, o mesmo padrão de veredito dividido: a estrutura é sólida, com zero
+        dependências circulares confirmadas por duas ferramentas independentes. Mas a higiene de
+        código está abaixo do ideal — 19 violações de lint e 4,55 por cento de duplicação contra uma
+        meta de 3. E a causa é localizada: 61 linhas quase idênticas entre os painéis de cliente e de
+        prestador. Sabemos exatamente onde está e o que fazer."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §7.3.5 Eficiência de desempenho; §7.3.6 Manutenibilidade</div>
+  </div>
+
+  <!-- SLIDE 21 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 21</span><span class="nome">Síntese e resposta à questão de pesquisa</span><span class="meta">Richardy · 0:55 · acum. 18:30</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Segurança</b> — atende após correção de dois defeitos reais; 1 CVE de produção a tratar; DAST pendente</li>
+        <li><b class="ok">Confiabilidade</b> — atende (máquina de estados, integridade referencial, fluxo crítico)</li>
+        <li><b>Testabilidade</b> — evoluiu (18% → 32%; críticos entre 82% e 100%, com limiar protegido)</li>
+        <li><b>Desempenho</b> — backend atende (p95 253 ms); <b class="nao">frontend não atende</b> (LCP 3,17 s)</li>
+        <li><b>Manutenibilidade</b> — estrutura atende (0 ciclos); higiene abaixo do ideal</li>
+        <li style="margin-top:2mm"><b>Resposta à questão:</b> um procedimento reprodutível — modelagem fiel + cenários derivados dos atributos + medição instrumentada com evidência + ciclo de correção</li>
+        <li><span class="destaque">O resultado não é um atestado de qualidade uniforme — e é justamente por isso que ele vale</span></li>
+      </ul>
+    </div>
+    <div class="visual"><b>Visual</b> — a Tabela 14 do artigo com semáforo por linha (verde/amarelo/vermelho). É o slide que a banca vai fotografar.</div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p>"Consolidando: a avaliação emite <b>vereditos por atributo e por camada</b>, e não um juízo
+        único. Segurança atende depois das correções, com um CVE de produção a tratar. Confiabilidade
+        atende. Testabilidade evoluiu. Desempenho tem veredito dividido: backend atende, frontend
+        não. Manutenibilidade também: a estrutura atende, a higiene não."</p>
+        <p>"E a resposta à nossa questão de pesquisa é esse procedimento: modelagem fiel do sistema
+        real, cenários derivados dos atributos de qualidade, medição instrumentada com registro de
+        evidências, e o ciclo de detectar e corrigir."</p>
+        <p>"Faço questão de dizer isto com todas as letras: <b>o resultado não é um atestado de que o
+        sistema é uniformemente bom</b>. Três defeitos reais foram encontrados e o desempenho de
+        frontend não atinge a meta. É exatamente essa capacidade de localizar deficiências com
+        precisão — dizer <i>qual</i> camada, <i>qual</i> política, <i>quais</i> 61 linhas — que evidencia
+        o valor do método. Um procedimento que aprovasse tudo não teria demonstrado nada."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §7.4 Síntese dos resultados (Tabela 14)</div>
+  </div>
+
+  <!-- SLIDE 22 -->
+  <div class="slide">
+    <div class="cab"><span class="n">SLIDE 22</span><span class="nome">Conclusão, limitações e trabalhos futuros</span><span class="meta">ambos · 0:50 · acum. 19:20</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Contribuição metodológica</b> — roteiro reprodutível que articula ISO/IEC 25010 (taxonomia) + ATAM (análise qualitativa) + ferramental instrumentado (evidência quantitativa), transferível a outras aplicações BaaS</li>
+        <li><b>Contribuição prática</b> — as correções aplicadas e os gates automatizados na integração contínua</li>
+        <li><b>Os três defeitos são característicos do paradigma:</b> todos residem em configuração declarativa ou no serviço gerenciado, e <b>nenhum se manifestava como erro funcional</b></li>
+        <li><b>Limitações</b> — DAST pendente · avaliação conduzida pela própria equipe (mitigada por fixar critérios antes da coleta) · generalização restrita a um único caso</li>
+        <li><b>Trabalhos futuros</b> — executar o DAST em ambiente publicado · aplicar o procedimento a outras plataformas BaaS · reduzir a duplicação entre os painéis · seguir otimizando o LCP até a meta</li>
+        <li style="margin-top:2mm"><b>Obrigado. Perguntas?</b></li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p><b>(Richardy)</b> "A principal contribuição do trabalho é metodológica: um roteiro
+        reprodutível, com registro de evidências e critérios fixados antes da coleta, transferível a
+        outras aplicações que adotem o mesmo paradigma. Ele articula três elementos — a 25010 dá a
+        taxonomia, o ATAM organiza a análise qualitativa, e o ferramental produz a evidência."</p>
+        <p>"E reforço o achado que amarra tudo: os três defeitos que encontramos são característicos
+        do paradigma BaaS. Todos moram em configuração declarativa ou no serviço gerenciado, e
+        nenhum deles se manifestava como erro funcional na aplicação. Eram invisíveis para o teste
+        convencional."</p>
+        <p><b>(Pedro, ou Richardy)</b> "Como limitações, registramos a varredura dinâmica ainda pendente,
+        o fato de a avaliação ter sido conduzida pela própria equipe — o que nos obrigou a explicitar
+        critérios previamente para mitigar viés — e a generalização restrita a um único caso. Como
+        trabalhos futuros, executar o DAST em ambiente publicado e aplicar o mesmo procedimento a
+        outras plataformas, para testar sua transferibilidade."</p>
+        <p>"Obrigado. Estamos à disposição para as perguntas."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §9 Conclusão; §8 nota sobre antecipação do cronograma</div>
+  </div>
+</div>
+
+<!-- ============ RESERVA ============ -->
+<div class="secao">
+  <h2 class="tit">Slides reserva — para o Q&amp;A da banca</h2>
+  <p style="margin:0 0 5mm; font-size:9.6pt; color:var(--suave)">
+    Não apresentados. Deixe-os depois do slide 22 no arquivo, para chamar por número se a pergunta vier.
+  </p>
+
+  <div class="slide">
+    <div class="cab"><span class="n">R1</span><span class="nome">Tabela 14 completa — síntese por atributo</span><span class="meta">reserva</span></div>
+    <table class="grade">
+      <thead><tr><th>Atributo (ISO/IEC 25010)</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr><td><b>Segurança</b></td><td>Autorização declarativa (RLS e triggers) atende após a correção de dois defeitos reais; 1 CVE de produção a tratar; DAST pendente contra produção</td></tr>
+        <tr><td><b>Confiabilidade</b></td><td>Atende (máquina de estados, integridade referencial e fluxo crítico)</td></tr>
+        <tr><td><b>Testabilidade</b></td><td>Evoluiu (cobertura de 18% para 32%; módulos críticos entre 82% e 100%, com limiar protegido)</td></tr>
+        <tr><td><b>Eficiência de desempenho</b></td><td>Backend atende (p95 de 253 ms); frontend não atende (LCP de 3,17 s após otimização)</td></tr>
+        <tr><td><b>Manutenibilidade</b></td><td>Estrutura atende (0 ciclos); higiene de código abaixo do ideal (lint e duplicação nos painéis)</td></tr>
+      </tbody>
+    </table>
+    <div class="fonte"><b>Fonte no artigo</b> · §7.4, Tabela 14</div>
+  </div>
+
+  <div class="slide">
+    <div class="cab"><span class="n">R2</span><span class="nome">O defeito de RLS, antes e depois</span><span class="meta">reserva</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>ANTES</b> — <span class="mono">CREATE POLICY ... ON profiles FOR SELECT USING (auth.uid() IS NOT NULL)</span><br>
+        qualquer usuário autenticado lia <span class="mono">email</span> e <span class="mono">phone</span> de todos os perfis</li>
+        <li><b>DEPOIS</b> — leitura direta restrita a <span class="mono">auth.uid() = id</span>; dados de contraparte servidos pela view <span class="mono">public_profiles</span>, que expõe <span class="mono">id, full_name, avatar_url, user_type, created_at</span> e <b>omite email e phone</b></li>
+        <li>Por que passou despercebido: a interface nunca exibia esses campos — mas a API os devolvia</li>
+        <li>Por que o cenário original não pegaria: ele testava apenas o acesso <b>anônimo</b>; foi ampliado para o autenticado não relacionado (registrado em §5.2.1)</li>
+      </ul>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §7.3.2; §4.4 (view public_profiles); §4.7; nota de refinamento em §5.2.1</div>
+  </div>
+
+  <div class="slide">
+    <div class="cab"><span class="n">R3</span><span class="nome">Números brutos de desempenho</span><span class="meta">reserva</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Carga (autocannon)</b> — 30 conexões concorrentes · 20 s · <b>44.413 requisições</b> · <b>0% de erro</b> · ~<b>2.221 req/s</b> · <b>p95 = 253 ms</b> (critério 800 ms)</li>
+        <li>Calibração do limiar: execução exploratória de 5 conexões por 5 s deu p95 ≈ <b>57 ms</b>; somada à heurística de 1 s para percepção de fluidez, fixou-se 800 ms com margem conservadora</li>
+        <li><b>Lighthouse</b> — mediana de 3 execuções, perfil móvel com limitação de CPU e rede</li>
+        <li>Antes do code-splitting: score <b>85</b> · LCP <b>3,49 s</b> · TBT <b>11 ms</b> · CLS <b>0,000</b> · bundle <b>679 KB</b></li>
+        <li>Depois: score <b>88</b> · LCP <b>3,17 s</b> · TBT <b>0 ms</b> · CLS <b>0,000</b> · bundle <b>489 KB</b> (−28%)</li>
+        <li>Metas: score ≥ 90 · LCP ≤ 2,5 s → <b class="nao">não atingidas</b></li>
+      </ul>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §7.3.5; §5.2.2 nota de calibração do limiar; evidências em <span class="mono">docs/tcc/medicoes/evidencias/</span></div>
+  </div>
+
+  <div class="slide">
+    <div class="cab"><span class="n">R4</span><span class="nome">Ameaças à validade e viés de auto-avaliação</span><span class="meta">reserva</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>Validade externa</b> — variabilidade de rede e do plano do serviço gerenciado</li>
+        <li><b>Validade de conclusão</b> — dependência da configuração do ambiente de carga</li>
+        <li><b>Validade de construção</b> — representatividade dos cenários frente ao uso real</li>
+        <li><b>Mitigações</b> — repetição das medições (mediana de 3 no Lighthouse) · fixação de parâmetros · registro das condições de cada execução</li>
+        <li><b>Sobre a auto-avaliação:</b> critérios fixados <b>antes</b> da coleta · regra anti-fabricação (nenhum valor sem evidência arquivada) · resultados desfavoráveis reportados com o mesmo rigor — três reprovações estão no artigo</li>
+      </ul>
+    </div>
+    <div class="bloco">
+      <div class="rot fala">Fala</div>
+      <div class="fala">
+        <p><i>Se a banca questionar a isenção:</i> "A melhor evidência de que não acomodamos os
+        critérios ao resultado é que o trabalho <b>reprova o próprio sistema em três frentes</b>:
+        segurança na primeira medição, desempenho de frontend mesmo após otimização, e higiene de
+        código. Se o viés estivesse operando, esses três não estariam no artigo."</p>
+      </div>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · §5.4 Ameaças à validade; §3.5 Procedimentos de análise; §9 Limitações</div>
+  </div>
+
+  <div class="slide">
+    <div class="cab"><span class="n">R5</span><span class="nome">Referências principais</span><span class="meta">reserva</span></div>
+    <div class="bloco">
+      <div class="rot tela">Na tela</div>
+      <ul class="tela">
+        <li><b>BASS, L.; CLEMENTS, P.; KAZMAN, R.</b> <i>Software architecture in practice.</i> 3. ed. Addison-Wesley, 2012.</li>
+        <li><b>CLEMENTS, P.; KAZMAN, R.; KLEIN, M.</b> <i>Evaluating software architectures: methods and case studies.</i> Addison-Wesley, 2002.</li>
+        <li><b>ISO/IEC 25010</b> — <i>Systems and software Quality Requirements and Evaluation (SQuaRE) — System and software quality models.</i> ISO, 2011.</li>
+        <li><b>PRESSMAN, R. S.; MAXIM, B. R.</b> <i>Engenharia de software: uma abordagem profissional.</i> 8. ed. AMGH, 2016.</li>
+        <li><b>SOMMERVILLE, I.</b> <i>Engenharia de software.</i> 9. ed. Pearson Prentice Hall, 2011.</li>
+        <li>ABNT NBR 6023:2018 · ABNT NBR 10520:2023</li>
+      </ul>
+    </div>
+    <div class="fonte"><b>Fonte no artigo</b> · Referências</div>
+  </div>
+</div>
+
+<!-- ============ CHECKLIST ============ -->
+<div class="secao">
+  <h2 class="tit">Checklist de montagem e ensaio</h2>
+
+  <h3 class="subtit">Ao montar os slides</h3>
+  <ul class="tela">
+    <li>Os bullets do bloco <b>NA TELA</b> já estão no tamanho certo — resista a colar a fala no slide.</li>
+    <li>Números sempre em destaque tipográfico: <b>253 ms</b>, <b>3,17 s</b>, <b>0 acessos indevidos</b>, <b>4,55%</b>. É o que a banca anota.</li>
+    <li>Slides que pedem imagem, não texto: <b>3</b> (tradicional × BaaS), <b>11</b> (Figura 1), <b>15</b> (Figura 3), <b>18</b> (antes/depois da política), <b>20</b> (duas barras), <b>21</b> (Tabela 14 com semáforo).</li>
+    <li>Use verde/vermelho de forma consistente para <i>atende</i> / <i>não atende</i> — o slide 21 depende disso.</li>
+  </ul>
+
+  <h3 class="subtit">Ao ensaiar</h3>
+  <ul class="tela">
+    <li>Cronometre os slides <b>6</b>, <b>18</b> e <b>21</b> isolados: são os que sustentam a defesa e os que mais tendem a estourar.</li>
+    <li>Ensaie o <i>handoff</i> depois do slide 11 — uma frase, sem apresentação do colega.</li>
+    <li>Se atrasar: corte detalhe dos slides <b>7</b>, <b>8</b> e <b>12</b>. Nunca corte o <b>6</b>, o <b>18</b> nem o <b>21</b>.</li>
+    <li>Perguntas mais prováveis: <i>"por que vocês mesmos desenvolveram o sistema?"</i> (slide 6) · <i>"32% de cobertura não é baixo?"</i> (slide 19, argumento da distribuição) · <i>"por que o DAST não foi feito?"</i> (slide 18) · <i>"como garantir isenção?"</i> (reserva R4).</li>
+  </ul>
+
+  <p style="margin:6mm 0 0; font-size:8.8pt; color:var(--suave)">
+    Conteúdo extraído de <span class="mono">docs/Artigo_PedroConrado_RichardyRodrigues_ATUALIZADO.docx</span>.
+    Todos os valores quantitativos conferem com a Seção 7 do artigo e com o registro em
+    <span class="mono">docs/tcc/medicoes/</span>.
+    Fonte deste PDF: <span class="mono">docs/tcc/conteudo-slides-defesa.html</span>.
+  </p>
+</div>
+
+</body>
+</html>

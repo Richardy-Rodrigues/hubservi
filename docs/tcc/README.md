@@ -19,9 +19,11 @@ Para exportar de uma vez (Word/LaTeX), use [TCC-Hubservi.md](TCC-Hubservi.md) �
 | 5 | [04-arquitetura-hubservi.md](04-arquitetura-hubservi.md) | 4 Arquitetura do Hubservi |
 | 6 | [05-planejamento-experimental.md](05-planejamento-experimental.md) | 5 Planejamento experimental e plano de métricas |
 | 7 | [06-avaliacao-atam.md](06-avaliacao-atam.md) | 6 Plano de avaliação arquitetural (ATAM) |
-| 8 | [07-resultados-parciais.md](07-resultados-parciais.md) | 7 Resultados parciais |
-| 9 | [08-cronograma.md](08-cronograma.md) | 8 Cronograma |
+| 8 | [07-resultados.md](07-resultados.md) | 7 Resultados |
+| 9 | [08-conclusao.md](08-conclusao.md) | 8 Conclusão |
 | 10 | [09-referencias.md](09-referencias.md) | Referências |
+
+> **Versão de referência.** O artigo entregue é o `.docx`/`.pdf` gerado por [gerar-artigo-docx.py](gerar-artigo-docx.py) (`docs/Artigo_PedroConrado_RichardyRodrigues_ATUALIZADO.docx`), onde está o conteúdo definitivo — incluindo a Seção 1.8, as figuras de evidência da Seção 7.3 e o Apêndice C. Os arquivos por seção abaixo servem à edição e podem estar atrás dele em detalhes de redação.
 
 **Apoio à defesa:** [10-apresentacao.md](10-apresentacao.md) — roteiro dos 10 minutos para 2 apresentadores (cronometragem, falas por slide e perguntas prováveis da banca). Não faz parte do corpo do artigo. As medições e evidências ficam em [medicoes/](medicoes/).
 

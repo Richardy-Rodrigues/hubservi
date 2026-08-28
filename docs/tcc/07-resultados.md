@@ -1,6 +1,6 @@
 # 7 Resultados
 
-Esta seção consolida os resultados do trabalho. Os objetivos específicos 1 a 4 (delimitação, modelagem, documentação e definição de cenários) foram concluídos e são reportados em 7.1–7.2. Os objetivos 5 a 9 (execução de testes automatizados, análise estática, testes de segurança e de desempenho, e análise) foram **executados**, antecipando o cronograma original (Seção 8): as medições são apresentadas em 7.3, e a síntese por atributo de qualidade em 7.4.
+Esta seção consolida os resultados do trabalho. Os objetivos específicos 1 a 4 (delimitação, modelagem, documentação e definição de cenários) foram concluídos e são reportados em 7.1–7.2. Os objetivos 5 a 9 (execução de testes automatizados, análise estática, testes de segurança e de desempenho, e análise) foram **executados** em julho de 2026: as medições são apresentadas em 7.3, e a síntese por atributo de qualidade em 7.4. As evidências de execução correspondentes estão no [Apêndice C](apendice-c-evidencias.md).
 
 Todos os valores quantitativos aqui reportados derivam de execuções registradas de forma reprodutível em `docs/tcc/medicoes/`, onde cada medição remete a uma ferramenta e versão, ao ambiente, à data e a um arquivo de evidência (conforme a Seção 5.1). Nenhum número é apresentado sem evidência correspondente.
 

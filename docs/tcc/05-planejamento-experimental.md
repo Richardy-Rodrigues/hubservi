@@ -80,9 +80,29 @@ Cada execução de medição registra: ferramenta e versão, ambiente, configura
 | Segurança | OWASP ZAP | Não | Varredura *dynamic* (DAST) |
 | Segurança | Snyk | Não | Análise de dependências (SCA) |
 
-## 5.4 Ambiente experimental e ameaças à validade
+## 5.4 Ambiente experimental
 
-- **Ambiente:** os testes de desempenho devem usar o *build* de produção (`vite build`), e as medições de segurança/RLS devem ocorrer contra uma instância Supabase de teste, evitando dados reais de produção.
-- **Ameaças à validade:** variabilidade de rede e do plano de serviço gerenciado (validade externa); dependência da configuração do ambiente de carga (validade de conclusão); representatividade dos cenários frente ao uso real (validade de construção). Tais ameaças serão mitigadas pela repetição das medições, pela fixação de parâmetros e pelo registro das condições de cada execução.
+Uma medição só é reprodutível se o ambiente em que ocorreu for conhecido. O quadro abaixo caracteriza o ambiente único em que toda a coleta foi realizada, nas datas de 15 e 16 de julho de 2026, sobre o estado do repositório fixado pelo *commit* `ad89e6c`. Os testes de desempenho de carregamento utilizaram o *build* de produção (`vite build`); as medições de segurança, de autorização (RLS) e de confiabilidade ocorreram contra uma instância Supabase local em contêiner, reconstruída do zero a cada execução por `supabase db reset`, o que elimina qualquer contato com dados reais de produção.
 
-> **Importante (regra anti-fabricação).** Esta seção define **o que** e **como** medir. Os resultados quantitativos serão obtidos na fase de execução (agosto de 2026 — Seção 8) e somente então preencherão a seção de resultados finais. Nenhum número aqui constitui medição realizada.
+| Dimensão | Configuração registrada |
+|---|---|
+| *Host* | Microsoft Windows 11 Pro for Workstations, *build* 26200; processador AMD Ryzen 5 PRO 230; 15,2 GB de memória RAM |
+| Tempo de execução | Node.js 24.14.0; npm 11.9.0 (versão fixada em `packageManager`); dependências instaladas por `npm ci`, a partir do `package-lock.json` |
+| Aplicação avaliada | *Build* de produção gerado por Vite 5.4.19; servido localmente para as execuções do Lighthouse |
+| Banco de dados e API | Supabase CLI 2.109.1, invocada por `npx` com versão fixada; imagem de contêiner `supabase/postgres:15.8.1.085` (PostgreSQL 15.8), executada em Docker Desktop sobre WSL 2; API PostgREST exposta em `127.0.0.1:54321` |
+| Versões das ferramentas | Vitest 3.2.7 com `@vitest/coverage-v8`; ESLint 9.32 com `typescript-eslint` 8.38 e `eslint-plugin-sonarjs` 3; jscpd 4; Madge 8; dependency-cruiser 16.10.4; Lighthouse 12.8.2 (perfil móvel, com limitação de CPU e de rede); autocannon 8; `npm audit`; `supabase db lint` 2.109.1 |
+| Volume de dados | Base reconstruída do zero (10 *migrations* e *seed*), com 11 categorias e nenhum usuário pré-existente; as suítes de integração criam e descartam os próprios usuários e registros a cada execução; o teste de carga foi semeado com 50 serviços ativos de um prestador, consultados com `limit=20` por requisição |
+
+> Fonte: registros de ambiente das coletas de 15 e 16 de julho de 2026, em [`medicoes/evidencias/`](medicoes/evidencias/).
+
+Uma dimensão do ambiente **não foi registrada** na coleta: a versão do Docker Desktop. Registra-se a omissão em vez de preenchê-la com a versão instalada hoje, que não seria a da medição. O impacto é considerado baixo, porque o que determina o comportamento do banco é a imagem de contêiner, essa sim fixada por *tag* (`15.8.1.085`), e não o programa que a executa.
+
+## 5.5 Ameaças à validade
+
+- **Ambiente local em vez de produção (validade externa).** As medições de API e de banco correm contra a instância local, sem latência de rede real nem os limites do plano de serviço gerenciado. Os números de desempenho de *backend* devem ser lidos como um **piso** — uma execução contra a instância gerenciada tende a apresentar latência maior.
+- **Volume de dados reduzido (validade de construção).** O teste de carga exercita uma tabela com 50 serviços, muito abaixo de qualquer operação real. O resultado atesta que a camada de dados responde sob concorrência, não que se mantenha sob volume; latência de leitura é sensível ao tamanho da relação e à seletividade dos índices, e essa dimensão permanece fora do escopo desta avaliação.
+- **Máquina única e não dedicada (validade de conclusão).** Toda a coleta ocorreu em um só *host*, compartilhado com o sistema operacional do usuário. Mitigou-se pela repetição das execuções sensíveis a ruído — o Lighthouse é reportado pela mediana de três execuções — e pela fixação dos parâmetros de cada ferramenta.
+- **Representatividade dos cenários (validade de construção).** Os cenários derivam da árvore de utilidade do ATAM (Seção 6) e não de dados de uso real, inexistentes para uma plataforma ainda não operada em produção.
+- **Avaliação conduzida pela equipe desenvolvedora (viés do avaliador).** Mitigou-se pela fixação dos critérios de aceitação **antes** da coleta (Seção 5.2) e pela regra de registro anti-fabricação (Seção 3.5), que obriga a reportar o resultado desfavorável com o mesmo rigor do favorável.
+
+Nem toda medição planejada é igualmente reproduzível por terceiros, e o [Apêndice B](apendice-b-reproducao.md) classifica cada uma quanto a isso, explicitando as que **não** reproduzem e por quê — a cobertura do *baseline*, por depender de um estado de árvore anterior às correções, e as medições de tempo, que reproduzem a faixa e o veredito, não o valor exato.

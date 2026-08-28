@@ -12,7 +12,7 @@
 
 ## Resumo
 
-Arquiteturas web fundamentadas em *Backend as a Service* (BaaS) e em computação *serverless* têm sido amplamente adotadas no desenvolvimento de aplicações, por reduzirem o esforço de implementação e operação da infraestrutura de *backend*. Entretanto, equipes de desenvolvimento enfrentam dificuldade em validar tecnicamente se essas arquiteturas atendem aos atributos de qualidade esperados, como segurança, desempenho, testabilidade e manutenibilidade. Este trabalho tem como objetivo avaliar tecnicamente a arquitetura de software da plataforma Hubservi — uma aplicação web de intermediação de serviços construída como *Single Page Application* (SPA) em React e TypeScript, apoiada pelo BaaS Supabase sobre PostgreSQL —, utilizando métricas e testes de Engenharia de Software relacionados a segurança, desempenho, testabilidade, manutenibilidade e confiabilidade, à luz da norma ISO/IEC 25010. A pesquisa caracteriza-se como aplicada, de abordagem mista, com objetivos exploratórios e descritivos, conduzida por meio de estudo de caso combinado a experimento técnico. Como contribuição, propõe-se um procedimento de avaliação arquitetural que articula a norma ISO/IEC 25010, o método ATAM (*Architecture Tradeoff Analysis Method*) e um conjunto de ferramentas de teste automatizado, análise estática, desempenho e segurança. Este artigo apresenta os resultados parciais consolidados — a definição do problema, a modelagem da arquitetura real e o planejamento experimental —, enquanto a execução das medições e a análise dos resultados constituem etapas subsequentes do cronograma.
+Arquiteturas web fundamentadas em *Backend as a Service* (BaaS) e em computação *serverless* têm sido amplamente adotadas no desenvolvimento de aplicações, por reduzirem o esforço de implementação e operação da infraestrutura de *backend*. Entretanto, equipes de desenvolvimento enfrentam dificuldade em validar tecnicamente se essas arquiteturas atendem aos atributos de qualidade esperados, como segurança, desempenho, testabilidade e manutenibilidade. Este trabalho tem como objetivo avaliar tecnicamente a arquitetura de software da plataforma Hubservi — uma aplicação web de intermediação de serviços construída como *Single Page Application* (SPA) em React e TypeScript, apoiada pelo BaaS Supabase sobre PostgreSQL —, utilizando métricas e testes de Engenharia de Software relacionados a segurança, desempenho, testabilidade, manutenibilidade e confiabilidade, à luz da norma ISO/IEC 25010. A pesquisa caracteriza-se como aplicada, de abordagem mista, com objetivos exploratórios e descritivos, conduzida por meio de estudo de caso combinado a experimento técnico. Como contribuição, propõe-se um procedimento de avaliação arquitetural que articula a norma ISO/IEC 25010, o método ATAM (*Architecture Tradeoff Analysis Method*) e um conjunto de ferramentas de teste automatizado, análise estática, desempenho e segurança. O procedimento foi executado sobre ambiente reprodutível e emitiu vereditos por atributo e por camada: três defeitos reais de autorização e de integridade foram detectados, corrigidos e re-medidos; a confiabilidade atende aos critérios definidos; o *backend* atende ao critério de desempenho, com latência de cauda (p97,5) de 253 ms e 0% de erro sob carga, ao passo que o carregamento inicial do *frontend* não o atinge, com LCP de 3,17 s após otimização, contra a meta de 2,5 s; e a manutenibilidade apresenta estrutura sólida, sem dependências circulares, com higiene de código abaixo do ideal. A capacidade de localizar deficiências específicas — e não de atestar qualidade uniforme — evidencia o valor do procedimento proposto.
 
 **Palavras-chave:** Arquitetura de software. Avaliação arquitetural. ISO/IEC 25010. Backend as a Service. Serverless.
 
@@ -86,7 +86,7 @@ Justifica-se, portanto, conduzir um estudo de caso que (i) modele e documente ri
 
 ## 1.7 Organização do artigo
 
-O restante do artigo está organizado da seguinte forma. A Seção 2 apresenta o referencial teórico sobre arquitetura de software, avaliação arquitetural, qualidade de software e arquiteturas BaaS/Serverless. A Seção 3 descreve a metodologia adotada. A Seção 4 documenta a arquitetura da plataforma Hubservi. A Seção 5 detalha o planejamento experimental e o plano de métricas. A Seção 6 apresenta o plano de avaliação arquitetural com base no ATAM. A Seção 7 consolida os resultados parciais. A Seção 8 expõe o cronograma. Por fim, são listadas as referências.
+O restante do artigo está organizado da seguinte forma. A Seção 2 apresenta o referencial teórico sobre arquitetura de software, avaliação arquitetural, qualidade de software e arquiteturas BaaS/Serverless. A Seção 3 descreve a metodologia adotada. A Seção 4 documenta a arquitetura da plataforma Hubservi. A Seção 5 detalha o planejamento experimental e o plano de métricas. A Seção 6 apresenta a avaliação arquitetural com base no ATAM. A Seção 7 consolida os resultados das medições executadas. A Seção 8 apresenta a conclusão, as limitações e os trabalhos futuros e, por fim, são listadas as referências.
 
 ---
 
@@ -445,12 +445,32 @@ Cada execução de medição registra: ferramenta e versão, ambiente, configura
 | Segurança | OWASP ZAP | Não | Varredura *dynamic* (DAST) |
 | Segurança | Snyk | Não | Análise de dependências (SCA) |
 
-## 5.4 Ambiente experimental e ameaças à validade
+## 5.4 Ambiente experimental
 
-- **Ambiente:** os testes de desempenho devem usar o *build* de produção (`vite build`), e as medições de segurança/RLS devem ocorrer contra uma instância Supabase de teste, evitando dados reais de produção.
-- **Ameaças à validade:** variabilidade de rede e do plano de serviço gerenciado (validade externa); dependência da configuração do ambiente de carga (validade de conclusão); representatividade dos cenários frente ao uso real (validade de construção). Tais ameaças serão mitigadas pela repetição das medições, pela fixação de parâmetros e pelo registro das condições de cada execução.
+Uma medição só é reprodutível se o ambiente em que ocorreu for conhecido. O quadro abaixo caracteriza o ambiente único em que toda a coleta foi realizada, nas datas de 15 e 16 de julho de 2026, sobre o estado do repositório fixado pelo *commit* `ad89e6c`. Os testes de desempenho de carregamento utilizaram o *build* de produção (`vite build`); as medições de segurança, de autorização (RLS) e de confiabilidade ocorreram contra uma instância Supabase local em contêiner, reconstruída do zero a cada execução por `supabase db reset`, o que elimina qualquer contato com dados reais de produção.
 
-> **Importante (regra anti-fabricação).** Esta seção define **o que** e **como** medir. Os resultados quantitativos serão obtidos na fase de execução (agosto de 2026 — Seção 8) e somente então preencherão a seção de resultados finais. Nenhum número aqui constitui medição realizada.
+| Dimensão | Configuração registrada |
+|---|---|
+| *Host* | Microsoft Windows 11 Pro for Workstations, *build* 26200; processador AMD Ryzen 5 PRO 230; 15,2 GB de memória RAM |
+| Tempo de execução | Node.js 24.14.0; npm 11.9.0 (versão fixada em `packageManager`); dependências instaladas por `npm ci`, a partir do `package-lock.json` |
+| Aplicação avaliada | *Build* de produção gerado por Vite 5.4.19; servido localmente para as execuções do Lighthouse |
+| Banco de dados e API | Supabase CLI 2.109.1, invocada por `npx` com versão fixada; imagem de contêiner `supabase/postgres:15.8.1.085` (PostgreSQL 15.8), executada em Docker Desktop sobre WSL 2; API PostgREST exposta em `127.0.0.1:54321` |
+| Versões das ferramentas | Vitest 3.2.7 com `@vitest/coverage-v8`; ESLint 9.32 com `typescript-eslint` 8.38 e `eslint-plugin-sonarjs` 3; jscpd 4; Madge 8; dependency-cruiser 16.10.4; Lighthouse 12.8.2 (perfil móvel, com limitação de CPU e de rede); autocannon 8; `npm audit`; `supabase db lint` 2.109.1 |
+| Volume de dados | Base reconstruída do zero (10 *migrations* e *seed*), com 11 categorias e nenhum usuário pré-existente; as suítes de integração criam e descartam os próprios usuários e registros a cada execução; o teste de carga foi semeado com 50 serviços ativos de um prestador, consultados com `limit=20` por requisição |
+
+> Fonte: registros de ambiente das coletas de 15 e 16 de julho de 2026, em [`medicoes/evidencias/`](medicoes/evidencias/).
+
+Uma dimensão do ambiente **não foi registrada** na coleta: a versão do Docker Desktop. Registra-se a omissão em vez de preenchê-la com a versão instalada hoje, que não seria a da medição. O impacto é considerado baixo, porque o que determina o comportamento do banco é a imagem de contêiner, essa sim fixada por *tag* (`15.8.1.085`), e não o programa que a executa.
+
+## 5.5 Ameaças à validade
+
+- **Ambiente local em vez de produção (validade externa).** As medições de API e de banco correm contra a instância local, sem latência de rede real nem os limites do plano de serviço gerenciado. Os números de desempenho de *backend* devem ser lidos como um **piso** — uma execução contra a instância gerenciada tende a apresentar latência maior.
+- **Volume de dados reduzido (validade de construção).** O teste de carga exercita uma tabela com 50 serviços, muito abaixo de qualquer operação real. O resultado atesta que a camada de dados responde sob concorrência, não que se mantenha sob volume; latência de leitura é sensível ao tamanho da relação e à seletividade dos índices, e essa dimensão permanece fora do escopo desta avaliação.
+- **Máquina única e não dedicada (validade de conclusão).** Toda a coleta ocorreu em um só *host*, compartilhado com o sistema operacional do usuário. Mitigou-se pela repetição das execuções sensíveis a ruído — o Lighthouse é reportado pela mediana de três execuções — e pela fixação dos parâmetros de cada ferramenta.
+- **Representatividade dos cenários (validade de construção).** Os cenários derivam da árvore de utilidade do ATAM (Seção 6) e não de dados de uso real, inexistentes para uma plataforma ainda não operada em produção.
+- **Avaliação conduzida pela equipe desenvolvedora (viés do avaliador).** Mitigou-se pela fixação dos critérios de aceitação **antes** da coleta (Seção 5.2) e pela regra de registro anti-fabricação (Seção 3.5), que obriga a reportar o resultado desfavorável com o mesmo rigor do favorável.
+
+Nem toda medição planejada é igualmente reproduzível por terceiros, e o [Apêndice B](apendice-b-reproducao.md) classifica cada uma quanto a isso, explicitando as que **não** reproduzem e por quê — a cobertura do *baseline*, por depender de um estado de árvore anterior às correções, e as medições de tempo, que reproduzem a faixa e o veredito, não o valor exato.
 
 ---
 
@@ -542,7 +562,7 @@ Cada cenário da árvore de utilidade vincula-se a uma ou mais métricas da Seç
 
 # 7 Resultados
 
-Esta seção consolida os resultados do trabalho. Os objetivos específicos 1 a 4 (delimitação, modelagem, documentação e definição de cenários) foram concluídos e são reportados em 7.1–7.2. Os objetivos 5 a 9 (execução de testes automatizados, análise estática, testes de segurança e de desempenho, e análise) foram **executados**, antecipando o cronograma original (Seção 8): as medições são apresentadas em 7.3, e a síntese por atributo de qualidade em 7.4.
+Esta seção consolida os resultados do trabalho. Os objetivos específicos 1 a 4 (delimitação, modelagem, documentação e definição de cenários) foram concluídos e são reportados em 7.1–7.2. Os objetivos 5 a 9 (execução de testes automatizados, análise estática, testes de segurança e de desempenho, e análise) foram **executados** em julho de 2026: as medições são apresentadas em 7.3, e a síntese por atributo de qualidade em 7.4. As evidências de execução correspondentes estão no [Apêndice C](apendice-c-evidencias.md).
 
 Todos os valores quantitativos aqui reportados derivam de execuções registradas de forma reprodutível em `docs/tcc/medicoes/`, onde cada medição remete a uma ferramenta e versão, ao ambiente, à data e a um arquivo de evidência (conforme a Seção 5.1). Nenhum número é apresentado sem evidência correspondente.
 
@@ -617,41 +637,15 @@ O trabalho responde à questão de pesquisa demonstrando um **procedimento repro
 
 ---
 
-# 8 Cronograma
+# 8 Conclusão
 
-O trabalho está organizado em quatro etapas mensais, com entrega final prevista para **setembro de 2026**.
+Este trabalho investigou como avaliar tecnicamente uma arquitetura web baseada em BaaS e *Serverless* por meio de métricas e testes de Engenharia de Software. A resposta oferecida à questão de pesquisa é um **procedimento de avaliação arquitetural** que articula três elementos: o modelo de qualidade da ISO/IEC 25010 (2011), que fornece a taxonomia dos atributos; o método ATAM (CLEMENTS; KAZMAN; KLEIN, 2002), que organiza a análise qualitativa em cenários, riscos e pontos de compromisso; e um conjunto instrumentado de ferramentas de teste automatizado, análise estática, desempenho e segurança, que produz a evidência quantitativa. O procedimento foi aplicado integralmente à plataforma Hubservi, adotada como instrumento por permitir o acesso irrestrito ao código, ao esquema e ao ambiente que a avaliação exige.
 
-| Mês (2026) | Atividades | Objetivos específicos | Situação |
-|------------|-----------|------------------------|----------|
-| **Junho** | Revisão teórica; modelagem arquitetural; definição de métricas | OE1, OE2, OE3, OE4 | Em consolidação |
-| **Julho** | Consolidação dos modelos UML; BPMN; DER; implementação/ajuste dos fluxos | OE2, OE3 | Planejado |
-| **Agosto** | Execução de testes automatizados; análise estática; testes de desempenho; testes de segurança | OE5, OE6, OE7, OE8 | Planejado |
-| **Setembro** | Análise dos resultados; redação final; revisão; apresentação; entrega | OE9 | Planejado |
+Os resultados demonstram que o procedimento é capaz de **localizar deficiências com precisão**, e não apenas de emitir um juízo agregado. Três defeitos reais foram detectados, corrigidos e re-medidos: a exposição de dados pessoais a qualquer usuário autenticado, decorrente de política de RLS excessivamente permissiva; a ausência de validação do prestador na inserção de avaliações; e a incapacidade de o histórico de *migrations* reconstruir um sistema funcional do zero, por privilégios aplicados fora do controle de versão. Os três são achados característicos do paradigma BaaS — todos residem em configuração declarativa ou no serviço gerenciado, e nenhum se manifestava como erro funcional aparente na aplicação.
 
-```mermaid
-gantt
-    title Cronograma do TCC Hubservi (2026)
-    dateFormat YYYY-MM-DD
-    axisFormat %b
-    section Teoria e modelagem
-    Revisão teórica            :a1, 2026-06-01, 30d
-    Modelagem arquitetural     :a2, 2026-06-01, 30d
-    Definição de métricas      :a3, 2026-06-10, 25d
-    section Artefatos
-    UML / BPMN / DER           :b1, 2026-07-01, 31d
-    Implementação dos fluxos   :b2, 2026-07-01, 31d
-    section Execução da avaliação
-    Testes automatizados       :c1, 2026-08-01, 14d
-    Análise estática           :c2, 2026-08-08, 14d
-    Testes de desempenho       :c3, 2026-08-15, 12d
-    Testes de segurança        :c4, 2026-08-18, 12d
-    section Fechamento
-    Análise de resultados      :d1, 2026-09-01, 12d
-    Redação e revisão final    :d2, 2026-09-08, 15d
-    Apresentação e entrega     :d3, 2026-09-25, 5d
-```
+A avaliação também evidenciou que vereditos por camada são mais informativos do que um veredito único: enquanto o *backend* atende folgadamente ao critério de desempenho, o carregamento inicial do *frontend* permanece abaixo da meta mesmo após otimização por *code-splitting*, o que confirma quantitativamente o ponto de compromisso identificado na análise ATAM — a arquitetura SPA transfere ao cliente parte do desempenho percebido. De modo análogo, a manutenibilidade apresenta estrutura sólida, sem dependências circulares, convivendo com higiene de código abaixo do ideal em *lint* e duplicação.
 
-> **Marco crítico:** a coleta de resultados quantitativos ocorre em **agosto de 2026**; até lá, o trabalho reporta planejamento e *baseline* (Seções 5 e 7), sem números de avaliação medidos.
+A principal contribuição é metodológica: um roteiro reprodutível, com registro de evidências e critérios fixados antes da coleta, transferível a outras aplicações que adotem o mesmo paradigma. A contribuição prática, para a plataforma avaliada, materializa-se nas correções aplicadas e nos *gates* automatizados incorporados à integração contínua. Como **limitações**, registram-se a varredura dinâmica de segurança (DAST) ainda pendente de execução contra a URL de produção, a condução da avaliação pela própria equipe desenvolvedora — o que exigiu explicitar critérios previamente para mitigar viés — e a generalização restrita a um único caso. Como **trabalhos futuros**, propõem-se a execução do DAST em ambiente publicado, a aplicação do mesmo procedimento a outras plataformas BaaS para avaliar sua transferibilidade, a redução da duplicação identificada entre os painéis e a continuidade da otimização de carregamento do *frontend* até o alcance da meta de LCP.
 
 ---
 
@@ -1228,7 +1222,7 @@ flowchart TD
 ## Notas
 
 - A criação do booking e as mudanças de status são validadas no banco (RLS + *triggers*).
-- A avaliação só é habilitada após `status = completed` (ver [sequência — avaliação](sequencia-avaliacao.md)).
+- A avaliação só é habilitada após `status = completed` (ver [sequência — avaliação](diagramas/sequencia-avaliacao.md)).
 
 ---
 

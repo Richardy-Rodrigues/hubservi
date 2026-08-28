@@ -26,13 +26,14 @@ node docs/tcc/gerar-apendice.mjs
 
 ### Como citar
 
-> VIEIRA, Pedro Conrado Fernandes; COSTA, Richardy Gabriel Rodrigues da. **Apêndice A — Diagramas (UML, BPMN e DER) e dicionário de dados**: material suplementar. Franca: Uni-FACEF, 2026. Disponível em: https://github.com/Richardy-Rodrigues/hubservi/blob/tcc-v1/docs/tcc/apendice-a-diagramas.md. Acesso em: [data].
+> VIEIRA, Pedro Conrado Fernandes; COSTA, Richardy Gabriel Rodrigues da. **Apêndice A — Diagramas (UML, BPMN e DER) e dicionário de dados**: material suplementar. Franca: Uni-FACEF, 2026. Disponível em: https://github.com/Richardy-Rodrigues/hubservi/blob/tcc-v2/docs/tcc/apendice-a-diagramas.md. Acesso em: [data].
 
 ### Material suplementar relacionado
 
 | Documento | Conteúdo |
 |---|---|
 | [Apêndice B — Reprodução das medições](apendice-b-reproducao.md) | Como reproduzir cada medição M-01…M-26, e o que não é reproduzível |
+| [Apêndice C — Evidências de execução](apendice-c-evidencias.md) | Capturas de tela de todas as execuções de ferramenta |
 | [Registro de medições](medicoes/registro-medicoes.md) | Tabela mestra: valor, ferramenta, versão, evidência e veredito |
 | [Protocolo de medição](medicoes/README.md) | Regras de coleta e regra anti-fabricação |
 | [Evidências brutas](medicoes/evidencias/) | Saídas originais das ferramentas, por data de coleta |

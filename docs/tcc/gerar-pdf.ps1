@@ -17,7 +17,7 @@
 #>
 [CmdletBinding()]
 param(
-    [ValidateSet('Tudo', 'Artigo', 'Apendice')]
+    [ValidateSet('Tudo', 'Artigo', 'Apendice', 'ApendiceC')]
     [string]$Somente = 'Tudo'
 )
 
@@ -35,6 +35,9 @@ $conversoes = @(
        Origem  = Join-Path $docs 'Apendice_A_Diagramas.docx'
        # Ao lado do .md: os dois são o mesmo material suplementar, em formatos diferentes.
        Destino = Join-Path $docs 'tcc\apendice-a-diagramas.pdf' }
+    @{ Nome = 'ApendiceC'
+       Origem  = Join-Path $docs 'Apendice_C_Evidencias.docx'
+       Destino = Join-Path $docs 'tcc\apendice-c-evidencias.pdf' }
 )
 
 if ($Somente -ne 'Tudo') {

@@ -364,6 +364,7 @@ A segunda invariante corrigiu um risco real: `tests/load/load-services.mjs` grav
 | Documento | Conteúdo |
 |---|---|
 | [Apêndice A — Diagramas e dicionário de dados](apendice-a-diagramas.md) | UML, BPMN, DER e dicionário de dados |
+| [Apêndice C — Evidências de execução](apendice-c-evidencias.md) | Capturas de tela de todas as execuções, com a saída bruta de cada uma |
 | [Registro de medições](medicoes/registro-medicoes.md) | Tabela mestra: valor, ferramenta, versão, evidência, veredito |
 | [Protocolo de medição](medicoes/README.md) | Regras de coleta e regra anti-fabricação |
 | [Explicação das métricas](medicoes/explicacao-metricas.md) | Cada métrica em linguagem acessível |
@@ -371,4 +372,4 @@ A segunda invariante corrigiu um risco real: `tests/load/load-services.mjs` grav
 
 ### Como citar
 
-> VIEIRA, Pedro Conrado Fernandes; COSTA, Richardy Gabriel Rodrigues da. **Apêndice B — Reprodução das medições**: material suplementar. Franca: Uni-FACEF, 2026. Disponível em: https://github.com/Richardy-Rodrigues/hubservi/blob/tcc-v1/docs/tcc/apendice-b-reproducao.md. Acesso em: [data].
+> VIEIRA, Pedro Conrado Fernandes; COSTA, Richardy Gabriel Rodrigues da. **Apêndice B — Reprodução das medições**: material suplementar. Franca: Uni-FACEF, 2026. Disponível em: https://github.com/Richardy-Rodrigues/hubservi/blob/tcc-v2/docs/tcc/apendice-b-reproducao.md. Acesso em: [data].

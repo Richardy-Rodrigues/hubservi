@@ -27,6 +27,7 @@ Uso:  python docs/tcc/gerar-artigo-docx.py
 """
 
 import re
+import struct
 from io import BytesIO
 from pathlib import Path
 
@@ -35,12 +36,13 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Emu, Pt
+from docx.shared import Cm, Emu, Pt
 
 RAIZ = Path(__file__).resolve().parents[2]
 ORIGEM = RAIZ / "docs" / "Artigo_PedroConrado_RichardyRodrigues.docx"
 SAIDA = RAIZ / "docs" / "Artigo_PedroConrado_RichardyRodrigues_ATUALIZADO.docx"
 SAIDA_APENDICE = RAIZ / "docs" / "Apendice_A_Diagramas.docx"
+SAIDA_APENDICE_C = RAIZ / "docs" / "Apendice_C_Evidencias.docx"
 
 FONTE = "Times New Roman"
 CORPO_PT = Pt(12)
@@ -53,11 +55,119 @@ FONTE_PADRAO = "Fonte: elaborado pelos autores (2026)."
 # A URL cita uma TAG do git, não uma branch: link de branch muda de conteúdo, e
 # referência acadêmica precisa apontar sempre para o mesmo estado do repositório.
 REPO_URL = "https://github.com/Richardy-Rodrigues/hubservi"
-TAG_TCC = "tcc-v1"
+TAG_TCC = "tcc-v2"
 APENDICE_A_URL = f"{REPO_URL}/blob/{TAG_TCC}/docs/tcc/apendice-a-diagramas.md"
 APENDICE_B_URL = f"{REPO_URL}/blob/{TAG_TCC}/docs/tcc/apendice-b-reproducao.md"
+APENDICE_C_URL = f"{REPO_URL}/blob/{TAG_TCC}/docs/tcc/apendice-c-evidencias.md"
+
+# Links profundos para o registro e para as saídas brutas. O artigo citava estes dois
+# como caminhos de sistema de arquivos ("docs/tcc/medicoes/"), o que não é verificável
+# por quem lê o PDF: reivindicar reprodutibilidade exige dar ao leitor o endereço.
+REGISTRO_URL = f"{REPO_URL}/blob/{TAG_TCC}/docs/tcc/medicoes/registro-medicoes.md"
+EVIDENCIAS_URL = f"{REPO_URL}/tree/{TAG_TCC}/docs/tcc/medicoes/evidencias"
+
+PRINTS = RAIZ / "docs" / "tcc" / "medicoes" / "evidencias" / "prints"
+
+# Capturas das execuções das ferramentas, na ordem em que compõem o Apêndice C.
+# Esta lista é a ÚNICA fonte da numeração: o apêndice a percorre para gerar as figuras
+# C.1 a C.17, e o corpo do artigo consulta `ref_c()` para escrever as remissões. Assim,
+# inserir ou remover uma captura não deixa nenhuma referência cruzada desatualizada.
+#
+# O identificador P-xx é o do catálogo de capturas do repositório; o P-06 (Madge) não
+# foi capturado, e a lacuna é declarada na abertura do apêndice em vez de silenciada —
+# a medição correspondente (M-03) é atestada pelo arquivo bruto e confirmada por
+# segunda ferramenta (dependency-cruiser, P-08).
+CAPTURAS = [
+    ("P-01", "P-01-reprodutibilidade.png",
+     "Ambiente de medição: sistema operacional, processador, Node.js e versões das "
+     "ferramentas, no *commit* `ad89e6c`",
+     "registro de ambiente", "15 e 16 jul. 2026", "2026-07-15/ambiente.txt"),
+    ("P-02", "P-02-vitest.png",
+     "Suíte unitária do *baseline*, com os 11 testes existentes no início da avaliação",
+     "Vitest 3.2.7", "15 jul. 2026", "2026-07-15/vitest-unit.log"),
+    ("P-03", "P-03-cobertura-testes.png",
+     "Cobertura após a ampliação da suíte: 31,99% das linhas (559 de 1.747) e 75% dos ramos",
+     "Vitest com `@vitest/coverage-v8`", "16 jul. 2026", "2026-07-16/coverage-semana5.txt"),
+    ("P-04", "P-04-M-02-eslint.png",
+     "Análise estática na configuração do projeto: 19 erros e 9 avisos",
+     "ESLint 9.32", "15 jul. 2026", "2026-07-15/eslint-report.json"),
+    ("P-05", "P-05-M-21-eslint-sonarjs.png",
+     "Análise estática sob a configuração de medição, com regras de complexidade e de "
+     "*code smells*: 25 erros e 4 avisos",
+     "ESLint 9.32 com `eslint-plugin-sonarjs` 3", "16 jul. 2026",
+     "2026-07-16/eslint-sonarjs-report.json"),
+    ("P-07", "P-07-M-22-duplicacao-cod-jscpd.png",
+     "Duplicação de código no agregado: 3,03% — 10 clones, 107 de 3.528 linhas",
+     "jscpd 4", "16 jul. 2026", "2026-07-16/jscpd/jscpd-report.json"),
+    ("P-08", "P-08-M-23-24-acoplamento-instabilidade.png",
+     "Instabilidade por módulo: núcleo estável (`lib/utils` 4%, `client.ts` 8%, "
+     "`AuthContext` 13%) e folhas voláteis entre 90% e 100%",
+     "dependency-cruiser 16.10.4", "16 jul. 2026", "2026-07-16/depcruise-metrics.txt"),
+    ("P-09", "P-09-M-04-05-stack-local-smoke-integracao.png",
+     "Reconstrução do banco a partir do histórico versionado (10 *migrations* e *seed*) e "
+     "*smoke* de integração aprovado, 4 de 4",
+     "Supabase CLI 2.109.1 e Vitest", "16 jul. 2026", "2026-07-16/vitest-integration.log"),
+    ("P-10", "P-10-M-05-13-rls-trigger.png",
+     "Suíte completa de autorização (RLS) e de *triggers*, executada contra a API PostgREST real",
+     "Vitest (integração)", "16 jul. 2026", "2026-07-16/suite-integracao-completa.log"),
+    ("P-11", "P-11-F02-03-antes-correcao.png",
+     "**Antes** da correção: duas falhas, com o vazamento literal do campo `email` de outro "
+     "usuário na saída do teste",
+     "Vitest (integração)", "16 jul. 2026", "2026-07-16/rls-furos-ANTES.log"),
+    ("P-12", "P-12-F-02-03-depois-correcao.png",
+     "**Depois** da correção: os mesmos dois testes aprovados, após as *migrations* corretivas",
+     "Vitest (integração)", "16 jul. 2026", "2026-07-16/rls-furos-DEPOIS.log"),
+    ("P-13", "P-13-F-01-privilegio-api-public-profile.png",
+     "Privilégios de API concedidos aos papéis `anon`, `authenticated` e `service_role` sobre "
+     "`profiles`, após a *migration* que tornou o histórico auto-suficiente",
+     "`psql` sobre o *stack* local", "16 jul. 2026", "2026-07-16/grants-profiles-depois.txt"),
+    ("P-14", "P-14-M-14-17-lighthouse-antes.png",
+     "Carregamento inicial **antes** do *code-splitting*: *performance score* de 85 e LCP de "
+     "3,49 s (execução mediana de três)",
+     "Lighthouse 12.8.2, perfil móvel", "16 jul. 2026", "2026-07-16/lighthouse-3.json"),
+    ("P-15", "P-15-M-14-17-lighthouse-depois.png",
+     "Carregamento inicial **depois** do *code-splitting*: *performance score* de 88 e LCP de "
+     "3,17 s (execução mediana de três)",
+     "Lighthouse 12.8.2, perfil móvel", "16 jul. 2026", "2026-07-16/lighthouse-split-2.json"),
+    ("P-16", "P-16-M-18-20-autocannon-carga-listagem.png",
+     "Carga sobre a listagem de serviços: 44.413 requisições em 20 s, vazão de 2.221 req/s, "
+     "nenhum erro e nenhuma resposta fora da faixa 2xx",
+     "autocannon 8", "16 jul. 2026", "2026-07-16/autocannon-load.json"),
+    ("P-17", "P-17-M-25-vulnerabilidade-audit.png",
+     "Análise de composição de dependências sobre 825 pacotes: 12 vulnerabilidades altas, 8 "
+     "moderadas e nenhuma crítica",
+     "`npm audit`", "16 jul. 2026", "2026-07-16/npm-audit.json"),
+    ("P-18", "P-18-M-26-integridade-schema.png",
+     "Verificação de integridade do *schema*: nenhum erro encontrado",
+     "`supabase db lint` 2.109.1", "16 jul. 2026", "2026-07-16/supabase-db-lint.txt"),
+]
+
+_N_CAPTURA = {pid: i + 1 for i, (pid, *_) in enumerate(CAPTURAS)}
+_CAPTURA = {c[0]: c for c in CAPTURAS}
+
+
+def ref_c(pid):
+    """Remissão ao Apêndice C — "Figura C.11" —, calculada a partir de `CAPTURAS`."""
+    return f"C.{_N_CAPTURA[pid]}"
+
+
+def fonte_captura(pid):
+    """Linha de fonte de uma captura: ferramenta, data e arquivo bruto preservado."""
+    _, _, _, ferramenta, data, arquivo = _CAPTURA[pid]
+    return (f"Fonte: {ferramenta}; execução de {data}; saída bruta preservada em "
+            f"`evidencias/{arquivo}`.")
+
 
 _INLINE = re.compile(r"\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`", re.DOTALL)
+
+
+def _largura_png(caminho):
+    """Largura em pixels de um PNG, lida do cabeçalho IHDR (sem dependência externa)."""
+    with open(caminho, "rb") as f:
+        cabecalho = f.read(24)
+    if cabecalho[:8] != b"\x89PNG\r\n\x1a\n":
+        raise RuntimeError(f"Não é um PNG: {caminho}")
+    return struct.unpack(">I", cabecalho[16:20])[0]
 
 
 def extrair_imagens(caminho):
@@ -328,6 +438,44 @@ class Artigo:
         rod.alignment = WD_ALIGN_PARAGRAPH.CENTER
         self._run(rod, FONTE_PADRAO, pt=TABELA_PT)
 
+    def figura_arquivo(self, legenda, caminho, fonte, largura_cm=15.5):
+        """Insere uma captura de tela vinda de arquivo, com legenda numerada e fonte.
+
+        Difere de `figura`: aquela consome os diagramas herdados do .docx de origem, em
+        ordem fixa; esta lê um PNG do repositório. As duas compartilham o contador, de
+        modo que a numeração do documento continue única e sequencial.
+
+        A linha de fonte não é a genérica "elaborado pelos autores": uma captura de
+        execução de ferramenta vale como evidência justamente por dizer qual ferramenta,
+        em que data e sobre qual arquivo bruto preservado — por isso `fonte` é
+        obrigatória aqui.
+
+        A largura padrão (15,5 cm) é a da mancha de texto A4 com as margens ABNT
+        (21 − 3 − 2 cm), com folga; a altura é escalada proporcionalmente. A largura
+        efetiva é reduzida quando esticar a captura até lá a deixaria abaixo de 150 dpi:
+        um terminal ampliado além da própria resolução fica borrado no papel, e o texto
+        da saída — que é o conteúdo da evidência — precisa continuar legível.
+        """
+        caminho = Path(caminho)
+        if not caminho.is_file():
+            raise RuntimeError(f"Captura ausente: {caminho}")
+        largura_px = _largura_png(caminho)
+        largura_cm = min(largura_cm, largura_px / 150 * 2.54)
+        self.n_figura += 1
+
+        cap = self.doc.add_paragraph()
+        cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        self._runs_markdown(cap, f"Figura {self.prefixo}{self.n_figura} — {legenda}",
+                            bold_base=True)
+
+        img = self.doc.add_paragraph()
+        img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        img.add_run().add_picture(str(caminho), width=Cm(largura_cm))
+
+        rod = self.doc.add_paragraph()
+        rod.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        self._runs_markdown(rod, fonte, pt=TABELA_PT)
+
     def salvar(self, destino):
         self.doc.save(str(destino))
 
@@ -585,8 +733,8 @@ def secao_1(a):
         "arquiteturas BaaS/Serverless. A Seção 3 descreve a metodologia adotada. A Seção 4 "
         "documenta a arquitetura da plataforma Hubservi. A Seção 5 detalha o planejamento "
         "experimental e o plano de métricas. A Seção 6 apresenta a avaliação arquitetural com base "
-        "no ATAM. A Seção 7 consolida os resultados das medições executadas. A Seção 8 expõe o "
-        "cronograma. A Seção 9 apresenta a conclusão e, por fim, são listadas as referências."
+        "no ATAM. A Seção 7 consolida os resultados das medições executadas. A Seção 8 apresenta a "
+        "conclusão, as limitações e os trabalhos futuros e, por fim, são listadas as referências."
     )
 
     a.secao("1.8 Disponibilidade dos artefatos")
@@ -599,13 +747,15 @@ def secao_1(a):
         "ferramenta, versão, data, valor, critério e veredito — e as saídas brutas de cada execução."
     )
     a.corpo(
-        "Dois documentos são publicados como **material suplementar**, referenciados ao longo do "
+        "Três documentos são publicados como **material suplementar**, referenciados ao longo do "
         "texto. O primeiro (VIEIRA; COSTA, 2026a) reúne os diagramas de modelagem — UML, BPMN e DER "
         "— e o dicionário de dados, numerados de forma autocontida (Figuras A.1 a A.10 e Tabelas "
         "A.1 a A.7). O segundo (VIEIRA; COSTA, 2026b) descreve como reproduzir cada medição "
         "reportada na Seção 7, classificando-as pelo que exigem do ambiente e explicitando quais "
-        "**não** são reproduzíveis e por quê — informação que a Seção 5.4 trata como parte das "
-        "ameaças à validade, e não como omissão."
+        "**não** são reproduzíveis e por quê — informação que a Seção 5.5 trata como parte das "
+        "ameaças à validade, e não como omissão. O terceiro (VIEIRA; COSTA, 2026c) reúne as "
+        "capturas de tela de todas as execuções de ferramenta que sustentam a Seção 7, das quais "
+        "as mais relevantes são reproduzidas no próprio corpo do artigo."
     )
 
 
@@ -872,7 +1022,7 @@ def secao_3(a):
         "qualidade e detalhado na Seção 5. Onde a ferramenta inicialmente prevista não estava "
         "disponível no ambiente (por exigir conta ou instalação indisponível), adotou-se um "
         "substituto **da mesma classe**, medindo as mesmas métricas; cada substituição está "
-        "registrada em `docs/tcc/medicoes/`."
+        f"registrada no registro de medições ({REGISTRO_URL})."
     )
     a.lista([
         "**Testes automatizados:** Vitest e React Testing Library (unitários e de componente); "
@@ -905,9 +1055,10 @@ def secao_3(a):
     a.corpo(
         "**Regra de registro e anti-fabricação.** Toda medição registra ferramenta e versão, "
         "ambiente, configuração, data, valor obtido e veredito, com o artefato bruto "
-        "correspondente arquivado em `docs/tcc/medicoes/evidencias/`. Nenhum valor é reportado sem "
-        "evidência associada, e os resultados desfavoráveis são registrados com o mesmo rigor que "
-        "os favoráveis (Seção 7)."
+        f"correspondente arquivado publicamente ({EVIDENCIAS_URL}) e reproduzido como captura de "
+        "tela no Apêndice C (VIEIRA; COSTA, 2026c). Nenhum valor é reportado sem evidência "
+        "associada, e os resultados desfavoráveis são registrados com o mesmo rigor que os "
+        "favoráveis (Seção 7)."
     )
 
 
@@ -1333,18 +1484,86 @@ def secao_5(a):
         ],
     )
 
-    a.secao("5.4 Ambiente experimental e ameaças à validade")
+    a.secao("5.4 Ambiente experimental")
+    a.corpo(
+        "Uma medição só é reprodutível se o ambiente em que ocorreu for conhecido. A Tabela 13 "
+        "caracteriza o ambiente único em que toda a coleta foi realizada, nas datas de 15 e 16 de "
+        "julho de 2026, sobre o estado do repositório fixado pelo *commit* `ad89e6c`. Os testes de "
+        "desempenho de carregamento utilizaram o *build* de produção (`vite build`); as medições "
+        "de segurança, de autorização (RLS) e de confiabilidade ocorreram contra uma instância "
+        "Supabase local em contêiner, reconstruída do zero a cada execução por `supabase db "
+        "reset`, o que elimina qualquer contato com dados reais de produção. Os valores da tabela "
+        f"são transcritos dos arquivos `ambiente.txt` arquivados com as evidências ({EVIDENCIAS_URL})."
+    )
+    a.tabela(
+        "Caracterização do ambiente experimental",
+        ["Dimensão", "Configuração registrada"],
+        [
+            ["*Host*",
+             "Microsoft Windows 11 Pro for Workstations, *build* 26200; processador AMD Ryzen 5 "
+             "PRO 230; 15,2 GB de memória RAM"],
+            ["Tempo de execução",
+             "Node.js 24.14.0; npm 11.9.0 (versão fixada em `packageManager`); dependências "
+             "instaladas por `npm ci`, a partir do `package-lock.json`"],
+            ["Aplicação avaliada",
+             "*Build* de produção gerado por Vite 5.4.19; servido localmente para as execuções do "
+             "Lighthouse"],
+            ["Banco de dados e API",
+             "Supabase CLI 2.109.1, invocada por `npx` com versão fixada; imagem de contêiner "
+             "`supabase/postgres:15.8.1.085` (PostgreSQL 15.8), executada em Docker Desktop sobre "
+             "WSL 2; API PostgREST exposta em `127.0.0.1:54321`"],
+            ["Versões das ferramentas (Tabela 12)",
+             "Vitest 3.2.7 com `@vitest/coverage-v8`; ESLint 9.32 com `typescript-eslint` 8.38 e "
+             "`eslint-plugin-sonarjs` 3; jscpd 4; Madge 8; dependency-cruiser 16.10.4; Lighthouse "
+             "12.8.2 (perfil móvel, com limitação de CPU e de rede); autocannon 8; `npm audit`; "
+             "`supabase db lint` 2.109.1"],
+            ["Volume de dados",
+             "Base reconstruída do zero (10 *migrations* e *seed*), com 11 categorias e nenhum "
+             "usuário pré-existente; as suítes de integração criam e descartam os próprios "
+             "usuários e registros a cada execução; o teste de carga foi semeado com 50 serviços "
+             "ativos de um prestador, consultados com `limit=20` por requisição"],
+        ],
+        fonte="Fonte: elaborado pelos autores (2026), a partir dos registros de ambiente das "
+              "coletas de 15 e 16 de julho de 2026.",
+    )
+    a.corpo(
+        "Uma dimensão do ambiente **não foi registrada** na coleta: a versão do Docker Desktop. "
+        "Registra-se a omissão em vez de preenchê-la com a versão instalada hoje, que não seria a "
+        "da medição. O impacto é considerado baixo, porque o que determina o comportamento do "
+        "banco é a imagem de contêiner, essa sim fixada por *tag* (`15.8.1.085`), e não o "
+        "programa que a executa."
+    )
+
+    a.secao("5.5 Ameaças à validade")
     a.lista([
-        "**Ambiente:** os testes de desempenho utilizaram o *build* de produção (`vite build`), e "
-        "as medições de segurança e de RLS ocorreram contra uma instância Supabase local em "
-        "contêiner, evitando dados reais de produção.",
-        "**Ameaças à validade:** variabilidade de rede e do plano de serviço gerenciado (validade "
-        "externa); dependência da configuração do ambiente de carga (validade de conclusão); "
-        "representatividade dos cenários frente ao uso real (validade de construção). Tais "
-        "ameaças foram mitigadas pela repetição das medições (mediana de três execuções, no caso "
-        "do Lighthouse), pela fixação de parâmetros e pelo registro das condições de cada "
-        "execução em `docs/tcc/medicoes/evidencias/`.",
+        "**Ambiente local em vez de produção (validade externa).** As medições de API e de banco "
+        "correm contra a instância local, sem latência de rede real nem os limites do plano de "
+        "serviço gerenciado. Os números de desempenho de *backend* devem ser lidos como um "
+        "**piso** — uma execução contra a instância gerenciada tende a apresentar latência maior.",
+        "**Volume de dados reduzido (validade de construção).** O teste de carga exercita uma "
+        "tabela com 50 serviços, muito abaixo de qualquer operação real. O resultado atesta que a "
+        "camada de dados responde sob concorrência, não que se mantenha sob volume; latência de "
+        "leitura é sensível ao tamanho da relação e à seletividade dos índices, e essa dimensão "
+        "permanece fora do escopo desta avaliação.",
+        "**Máquina única e não dedicada (validade de conclusão).** Toda a coleta ocorreu em um só "
+        "*host*, compartilhado com o sistema operacional do usuário. Mitigou-se pela repetição "
+        "das execuções sensíveis a ruído — o Lighthouse é reportado pela mediana de três "
+        "execuções — e pela fixação dos parâmetros de cada ferramenta.",
+        "**Representatividade dos cenários (validade de construção).** Os cenários derivam da "
+        "árvore de utilidade do ATAM (Seção 6) e não de dados de uso real, inexistentes para uma "
+        "plataforma ainda não operada em produção.",
+        "**Avaliação conduzida pela equipe desenvolvedora (viés do avaliador).** Mitigou-se pela "
+        "fixação dos critérios de aceitação **antes** da coleta (Seção 5.2) e pela regra de "
+        "registro anti-fabricação (Seção 3.5), que obriga a reportar o resultado desfavorável com "
+        "o mesmo rigor do favorável.",
     ])
+    a.corpo(
+        "Nem toda medição planejada é igualmente reproduzível por terceiros, e o Apêndice B "
+        "(VIEIRA; COSTA, 2026b) classifica cada uma quanto a isso, explicitando as que **não** "
+        "reproduzem e por quê — a cobertura do *baseline*, por depender de um estado de árvore "
+        "anterior às correções, e as medições de tempo, que reproduzem a faixa e o veredito, não "
+        "o valor exato."
+    )
 
 
 def secao_6(a):
@@ -1496,15 +1715,18 @@ def secao_7(a):
         "Esta seção consolida os resultados do trabalho. Os objetivos específicos 1 a 4 "
         "(delimitação, modelagem, documentação e definição de cenários) foram concluídos e são "
         "reportados em 7.1 e 7.2. Os objetivos 5 a 9 (execução de testes automatizados, análise "
-        "estática, testes de segurança e de desempenho, e análise) foram **executados**, "
-        "antecipando o cronograma original (Seção 8): as medições são apresentadas em 7.3, e a "
-        "síntese por atributo de qualidade em 7.4."
+        "estática, testes de segurança e de desempenho, e análise) foram **executados** em julho "
+        "de 2026: as medições são apresentadas em 7.3, e a síntese por atributo de qualidade em "
+        "7.4."
     )
     a.corpo(
         "Todos os valores quantitativos aqui reportados derivam de execuções registradas de forma "
-        "reprodutível em `docs/tcc/medicoes/`, onde cada medição remete a uma ferramenta e versão, "
-        "ao ambiente, à data e a um arquivo de evidência (conforme a Seção 5.1). Nenhum número é "
-        "apresentado sem evidência correspondente."
+        "reprodutível, no ambiente caracterizado na Seção 5.4, onde cada medição remete a uma "
+        "ferramenta e versão, ao ambiente, à data e a um arquivo de evidência (conforme a Seção "
+        f"5.1). Nenhum número é apresentado sem evidência correspondente. O registro completo está "
+        f"em {REGISTRO_URL} e as saídas brutas de cada execução, em {EVIDENCIAS_URL}; as capturas "
+        "de tela dessas execuções compõem o Apêndice C (VIEIRA; COSTA, 2026c), ao qual cada "
+        "subseção a seguir remete."
     )
 
     a.secao("7.1 Definição e delimitação do estudo")
@@ -1564,7 +1786,14 @@ def secao_7(a):
         "Corrigiu-se com uma *migration* que torna o histórico auto-suficiente, sem alterar "
         "políticas de segurança. É um resultado característico do paradigma BaaS — parte da "
         "configuração vive no serviço gerenciado e escapa ao controle de versão — e só se revela "
-        "sob uma avaliação conduzida em ambiente limpo e reprodutível."
+        "sob uma avaliação conduzida em ambiente limpo e reprodutível. A Figura 4 mostra os "
+        f"privilégios já concedidos após a correção (ver também Apêndice C, Figura {ref_c('P-09')})."
+    )
+    a.figura_arquivo(
+        "Privilégios de API sobre `profiles` após a *migration* corretiva, verificados no banco "
+        "reconstruído do zero",
+        PRINTS / _CAPTURA["P-13"][1],
+        fonte_captura("P-13"),
     )
 
     a.secao("7.3.2 Segurança")
@@ -1584,6 +1813,24 @@ def secao_7(a):
         "espelhado.",
     ])
     a.corpo(
+        "As Figuras 5 e 6 registram o par antes/depois desses dois defeitos. Na primeira, os "
+        "testes falham e a saída exibe o vazamento literal — o campo `email` de outro usuário "
+        "devolvido pela API a um cliente que não deveria vê-lo; na segunda, os mesmos testes "
+        "passam, contra o mesmo cenário, após as *migrations* corretivas. Preservar os dois "
+        "estados é o que distingue um defeito detectado de uma suíte que nunca reprovou nada "
+        "(Seção 3.5)."
+    )
+    a.figura_arquivo(
+        "Antes da correção: falha dos testes de isolamento, com o vazamento de PII na saída",
+        PRINTS / _CAPTURA["P-11"][1],
+        fonte_captura("P-11"),
+    )
+    a.figura_arquivo(
+        "Depois da correção: os mesmos testes aprovados, sem alteração no cenário",
+        PRINTS / _CAPTURA["P-12"][1],
+        fonte_captura("P-12"),
+    )
+    a.corpo(
         "Após as correções, a suíte de segurança (isolamento de perfis, serviços e *bookings*; "
         "bloqueio de escalonamento de `user_type`; regras de *review*) passa integralmente — **0 "
         "acessos indevidos nos cenários testados**, em 30 testes de integração distribuídos por "
@@ -1593,7 +1840,8 @@ def secao_7(a):
         "disponível), sendo as demais ferramentas de *build* e de desenvolvimento, sem superfície "
         "de ataque em produção. O `supabase db lint` não acusou erros de *schema*. A varredura "
         "dinâmica (DAST/OWASP ZAP) permanece **pendente** de execução contra a URL de produção, "
-        "por depender do ambiente de *hosting* real."
+        "por depender do ambiente de *hosting* real. As execuções correspondentes estão no "
+        f"Apêndice C (Figuras {ref_c('P-10')}, {ref_c('P-17')} e {ref_c('P-18')})."
     )
 
     a.secao("7.3.3 Confiabilidade")
@@ -1602,7 +1850,7 @@ def secao_7(a):
         "transições inválidas (0 transições inválidas aceitas); a **integridade referencial** em "
         "exclusão de serviço não deixa registros órfãos (cascata); e o **fluxo crítico ponta a "
         "ponta** (autenticação, serviço, *booking* e avaliação) completa com sucesso no caso "
-        "válido. Atende aos critérios da Seção 5.2.5."
+        f"válido. Atende aos critérios da Seção 5.2.5 (ver Apêndice C, Figura {ref_c('P-10')})."
     )
 
     a.secao("7.3.4 Testabilidade")
@@ -1616,6 +1864,19 @@ def secao_7(a):
         "Introduziu-se uma *factory* de *mock* compartilhada, reduzindo o esforço de escrever "
         "novos testes — evidência de que a testabilidade da arquitetura, atributo sob avaliação, "
         "melhorou."
+    )
+    a.figura_arquivo(
+        "Cobertura de testes ao final da ampliação da suíte",
+        PRINTS / _CAPTURA["P-03"][1],
+        fonte_captura("P-03"),
+    )
+    a.corpo(
+        "O estado inicial não dispõe de captura equivalente, e a assimetria é registrada em vez "
+        "de contornada: a cobertura de 18,03% foi medida sobre uma árvore de trabalho anterior às "
+        "correções e é, conforme o Apêndice B (VIEIRA; COSTA, 2026b), a única medição do trabalho "
+        "que **não se reproduz em *commit* algum**. O que se preserva do estado inicial é a suíte "
+        f"do *baseline*, com seus 11 testes (Apêndice C, Figura {ref_c('P-02')}), não o "
+        "percentual."
     )
 
     a.secao("7.3.5 Eficiência de desempenho")
@@ -1634,8 +1895,27 @@ def secao_7(a):
         "manteve-se em 0,000.",
     ])
     a.corpo(
+        "As Figuras 8 e 9 apresentam os relatórios do Lighthouse antes e depois do "
+        "*code-splitting*, na execução mediana de cada rodada de três. A comparação torna visível "
+        "tanto o ganho quanto o seu limite: os indicadores melhoram na direção esperada, e ainda "
+        "assim o LCP permanece acima do critério de 2,5 s."
+    )
+    a.figura_arquivo(
+        "Carregamento inicial antes do *code-splitting*: *score* de 85 e LCP de 3,49 s",
+        PRINTS / _CAPTURA["P-14"][1],
+        fonte_captura("P-14"),
+    )
+    a.figura_arquivo(
+        "Carregamento inicial depois do *code-splitting*: *score* de 88 e LCP de 3,17 s",
+        PRINTS / _CAPTURA["P-15"][1],
+        fonte_captura("P-15"),
+    )
+    a.corpo(
         "O contraste entre a API rápida e o carregamento lento localiza o gargalo de desempenho no "
-        "*frontend* (peso do *bundle*), e não no *backend*."
+        "*frontend* (peso do *bundle*), e não no *backend*. O ensaio de carga que sustenta o "
+        f"resultado de *backend* consta do Apêndice C, Figura {ref_c('P-16')}; note-se que ele "
+        "corre sobre o volume de dados declarado na Seção 5.4, e vale como piso, não como "
+        "projeção de operação real (Seção 5.5)."
     )
 
     a.secao("7.3.6 Manutenibilidade")
@@ -1647,7 +1927,8 @@ def secao_7(a):
         "configuração atual e 25 sob configuração recomendada, incluindo funções com complexidade "
         "ciclomática elevada), e a **duplicação na camada de interface é de 4,55%** (acima da meta "
         "de 3%), com causa localizada — os dois painéis, de cliente e de prestador, compartilham "
-        "61 linhas quase idênticas."
+        f"61 linhas quase idênticas. As execuções constam do Apêndice C (Figuras {ref_c('P-04')}, "
+        f"{ref_c('P-05')}, {ref_c('P-07')} e {ref_c('P-08')})."
     )
 
     a.secao("7.4 Síntese dos resultados")
@@ -1688,44 +1969,16 @@ def secao_7(a):
     )
 
 
+# A Seção "8 Cronograma" foi removida nesta versão final. Um cronograma de etapas
+# futuras é elemento de projeto de pesquisa, não de relato conclusivo: o trabalho
+# terminou, e a tabela de meses com situação "Planejado" contradizia a Seção 7, que
+# já reporta as medições executadas. As pendências que ali constavam (DAST contra a
+# URL de produção) passaram a ser tratadas como limitação na conclusão, que é o lugar
+# metodologicamente correto para elas. A conclusão, antes Seção 9, passa a ser a 8.
+
+
 def secao_8(a):
-    a.secao("8 Cronograma")
-    a.corpo(
-        "O trabalho está organizado em quatro etapas mensais, com entrega final prevista para "
-        "**setembro de 2026**."
-    )
-    a.tabela(
-        "Cronograma de execução do trabalho",
-        ["Mês (2026)", "Atividades", "Objetivos específicos", "Situação"],
-        [
-            ["**Junho**",
-             "Revisão teórica; modelagem arquitetural; definição de métricas",
-             "OE1, OE2, OE3, OE4", "Concluído"],
-            ["**Julho**",
-             "Consolidação dos modelos UML, BPMN e DER; implementação e ajuste dos fluxos; "
-             "execução antecipada das medições e ciclo de correção de defeitos",
-             "OE2, OE3, OE5, OE6, OE7, OE8", "Concluído"],
-            ["**Agosto**",
-             "Consolidação e revisão das medições; integração contínua com *gates* de qualidade; "
-             "análise dos resultados",
-             "OE5, OE6, OE7, OE8, OE9", "Em andamento"],
-            ["**Setembro**",
-             "Redação final; revisão; apresentação; entrega", "OE9", "Planejado"],
-        ],
-    )
-    # O Gantt da Seção 8 do consolidado não é reproduzido: a Tabela 15 já apresenta o
-    # cronograma mês a mês com a situação de cada etapa, e o diagrama nunca foi renderizado.
-    a.corpo(
-        "**Nota sobre a antecipação.** A coleta de resultados quantitativos, originalmente "
-        "prevista para agosto de 2026, foi antecipada e executada em julho de 2026; os resultados "
-        "constam da Seção 7 e o registro reprodutível correspondente, de `docs/tcc/medicoes/`. A "
-        "varredura dinâmica de segurança (DAST) permanece a única medição pendente, condicionada à "
-        "publicação da URL de produção."
-    )
-
-
-def secao_9(a):
-    a.secao("9 Conclusão")
+    a.secao("8 Conclusão")
     a.corpo(
         "Este trabalho investigou como avaliar tecnicamente uma arquitetura web baseada em BaaS e "
         "*Serverless* por meio de métricas e testes de Engenharia de Software. A resposta oferecida "
@@ -1810,6 +2063,10 @@ def referencias(a):
          "Apêndice B — Reprodução das medições",
          f": material suplementar. Franca: Uni-FACEF, 2026b. Disponível em: {APENDICE_B_URL}. "
          "Acesso em: 20 ago. 2026."),
+        ("VIEIRA, Pedro Conrado Fernandes; COSTA, Richardy Gabriel Rodrigues da. ",
+         "Apêndice C — Evidências de execução",
+         f": material suplementar. Franca: Uni-FACEF, 2026c. Disponível em: {APENDICE_C_URL}. "
+         "Acesso em: 28 ago. 2026."),
     ]
     for i, (antes, titulo, depois) in enumerate(entradas):
         if i:
@@ -1994,6 +2251,171 @@ def apendice(a):
     )
 
 
+def apendice_c(a):
+    """Conteúdo do Apêndice C — Evidências de execução, como DOCUMENTO PRÓPRIO.
+
+    Mesma lógica dos Apêndices A e B: material suplementar citável, com numeração
+    autocontida (prefixo "C."), de modo que inserir uma figura no corpo do artigo não
+    desloque nenhuma referência daqui.
+
+    A fronteira com o Apêndice B é deliberada e vale dizê-la: o B ensina **como
+    reproduzir** cada medição; o C mostra **o que se viu** quando ela foi executada.
+    Um é procedimento, o outro é registro — não se substituem.
+    """
+    a.prefixo = "C."
+    # Nenhuma imagem vem do .docx de origem: todas as capturas são lidas do repositório.
+
+    a.titulo_artigo("Apêndice C — Evidências de execução")
+    a.centro("MATERIAL SUPLEMENTAR")
+    a.vazio()
+    a.corpo(
+        "Material suplementar do artigo *Avaliação Técnica de uma Arquitetura Web baseada em "
+        "BaaS/Serverless para Intermediação de Serviços: um estudo de caso da plataforma "
+        "Hubservi*, de Pedro Conrado Fernandes Vieira e Richardy Gabriel Rodrigues da Costa, "
+        "sob orientação do Prof. Daniel Facciolo Pires (Uni-FACEF, 2026)."
+    )
+    a.corpo(
+        "Este apêndice reúne as capturas de tela de todas as execuções de ferramenta que "
+        "sustentam os resultados da Seção 7 do artigo. As mais relevantes — as que evidenciam os "
+        "três defeitos detectados e os pares antes/depois de cobertura e de desempenho — são "
+        "reproduzidas também no corpo do artigo; o conjunto completo fica aqui, para que a "
+        "verificação de qualquer número reportado não dependa de acesso ao ambiente de execução."
+    )
+    a.corpo(
+        "As saídas brutas correspondentes, citadas na linha de fonte de cada figura, estão "
+        f"versionadas em {EVIDENCIAS_URL}, e o registro de cada medição — com ferramenta, versão, "
+        f"critério, valor e veredito — em {REGISTRO_URL}. O procedimento para reexecutar cada uma "
+        "delas é o do Apêndice B (VIEIRA; COSTA, 2026b)."
+    )
+    a.corpo(
+        "**Nota de método, válida para todas as figuras.** As capturas **reencenam na tela as "
+        "saídas preservadas** das execuções de 15 e 16 de julho de 2026, no *commit* `ad89e6c`. "
+        "Nenhuma medição foi reexecutada para produzi-las, e é isso que garante que cada número "
+        "visível nas imagens seja idêntico ao reportado no artigo. A reencenação é literal: as "
+        "saídas de terminal são impressas byte a byte, com as sequências de cor originais, e os "
+        "relatórios do ESLint e do Lighthouse são renderizados pelo relatório oficial da própria "
+        "ferramenta, a partir dos arquivos JSON arquivados. Reexecutar as ferramentas hoje "
+        "produziria números diferentes dos do artigo — e a saída que evidencia a exposição de PII "
+        f"(Figura {ref_c('P-11')}) sequer é reproduzível, já que o defeito foi corrigido."
+    )
+    a.corpo(
+        "**Uma lacuna declarada.** O catálogo de capturas do repositório prevê 18 telas; 17 estão "
+        "reproduzidas aqui. Falta a do Madge (medição M-03, ausência de dependências circulares), "
+        "que não chegou a ser capturada. A medição não fica sem evidência: ela é atestada pelo "
+        "arquivo bruto `evidencias/2026-07-15/madge-circular.txt` e confirmada de forma "
+        f"independente por segunda ferramenta, o dependency-cruiser (Figura {ref_c('P-08')})."
+    )
+
+    a.tabela(
+        "Índice das evidências de execução",
+        ["Figura", "Captura", "Ferramenta", "Saída bruta preservada"],
+        [[f"C.{i}", pid, ferramenta, f"`evidencias/{arquivo}`"]
+         for i, (pid, _, _, ferramenta, _, arquivo) in enumerate(CAPTURAS, 1)],
+        fonte="Fonte: elaborado pelos autores (2026).",
+    )
+
+    for pid, arquivo, legenda, _, _, _ in CAPTURAS:
+        a.figura_arquivo(legenda, PRINTS / arquivo, fonte_captura(pid))
+
+
+def gerar_apendice_c_md():
+    """Escreve a versão navegável do Apêndice C, em Markdown, no repositório.
+
+    É o arquivo para onde aponta a URL citada no artigo (APENDICE_C_URL): sem ele, a
+    referência VIEIRA; COSTA (2026c) seria um link morto. Gerar os dois formatos da
+    mesma lista `CAPTURAS` garante que a numeração C.x do .docx e a do .md nunca
+    divirjam — que é o defeito clássico de material suplementar mantido à mão.
+    """
+    destino = RAIZ / "docs" / "tcc" / "apendice-c-evidencias.md"
+    L = []
+    L.append("# Apêndice C — Evidências de execução\n")
+    L.append(
+        "**Material suplementar** do artigo *Avaliação Técnica de uma Arquitetura Web baseada "
+        "em BaaS/Serverless para Intermediação de Serviços: um estudo de caso da plataforma "
+        "Hubservi*.\n"
+    )
+    L.append("Pedro Conrado Fernandes Vieira · Richardy Gabriel Rodrigues da Costa  ")
+    L.append("Graduandos em Engenharia de Software — Uni-FACEF  ")
+    L.append("Orientador: Prof. Daniel Facciolo Pires\n")
+    L.append("> **Arquivo gerado** por `docs/tcc/gerar-artigo-docx.py`. Para alterar legendas ou "
+             "a ordem das figuras, edite a lista `CAPTURAS` naquele script e regenere — assim o "
+             "Markdown e o `.docx` continuam com a mesma numeração.\n")
+    L.append("---\n")
+    L.append("## O que este documento é\n")
+    L.append(
+        "As capturas de tela de **todas** as execuções de ferramenta que sustentam a Seção 7 do "
+        "artigo. As mais relevantes — os três defeitos detectados e os pares antes/depois de "
+        "cobertura e de desempenho — aparecem também no corpo do artigo; o conjunto completo "
+        "fica aqui, para que verificar qualquer número reportado não dependa de acesso ao "
+        "ambiente de execução.\n"
+    )
+    L.append(
+        "A fronteira com o [Apêndice B](apendice-b-reproducao.md) é deliberada: o **B** ensina "
+        "*como reproduzir* cada medição; o **C** mostra *o que se viu* quando ela foi executada. "
+        "Um é procedimento, o outro é registro.\n"
+    )
+    L.append("---\n")
+    L.append("## Nota de método — vale como legenda de todas as figuras\n")
+    L.append(
+        "As imagens **reencenam na tela as saídas preservadas** das execuções de **15 e 16 de "
+        "julho de 2026**, no commit `ad89e6c`. **Nenhuma medição foi reexecutada para "
+        "produzi-las** — é isso que garante que cada número visível seja idêntico ao reportado "
+        "no artigo. A reencenação é literal: as saídas de terminal são impressas byte a byte, "
+        "com as sequências de cor originais, e os relatórios do ESLint e do Lighthouse são "
+        "renderizados pelo relatório oficial da própria ferramenta a partir dos JSON "
+        "arquivados.\n"
+    )
+    L.append(
+        "Reexecutar as ferramentas hoje produziria números diferentes dos do artigo — e a saída "
+        f"que evidencia a exposição de PII (Figura {ref_c('P-11')}) sequer é reproduzível, já "
+        "que o defeito foi corrigido. O procedimento de captura está em "
+        "[`medicoes/evidencias/prints/README.md`](medicoes/evidencias/prints/README.md).\n"
+    )
+    L.append("### Uma lacuna declarada\n")
+    L.append(
+        "O catálogo do repositório prevê 18 telas; **17** estão aqui. Falta a do Madge (medição "
+        "M-03, ausência de dependências circulares), que não chegou a ser capturada. A medição "
+        "não fica sem evidência: é atestada pelo arquivo bruto "
+        "[`madge-circular.txt`](medicoes/evidencias/2026-07-15/madge-circular.txt) e confirmada "
+        f"de forma independente pelo dependency-cruiser (Figura {ref_c('P-08')}).\n"
+    )
+    L.append("---\n")
+    L.append("## Índice\n")
+    L.append("| Figura | Captura | Ferramenta | Saída bruta preservada |")
+    L.append("|---|---|---|---|")
+    for i, (pid, _, _, ferramenta, _, arquivo) in enumerate(CAPTURAS, 1):
+        L.append(f"| C.{i} | {pid} | {ferramenta} | "
+                 f"[`{arquivo}`](medicoes/evidencias/{arquivo}) |")
+    L.append("")
+    L.append("---\n")
+    L.append("## Figuras\n")
+    for i, (pid, arquivo, legenda, ferramenta, data, bruto) in enumerate(CAPTURAS, 1):
+        L.append(f"### Figura C.{i} — {legenda}\n")
+        L.append(f"![Figura C.{i}](medicoes/evidencias/prints/{arquivo})\n")
+        L.append(f"*Fonte: {ferramenta}; execução de {data}; saída bruta preservada em "
+                 f"[`{bruto}`](medicoes/evidencias/{bruto}).*\n")
+    L.append("---\n")
+    L.append("## Material suplementar relacionado\n")
+    L.append("| Documento | Conteúdo |")
+    L.append("|---|---|")
+    L.append("| [Apêndice A — Diagramas e dicionário de dados](apendice-a-diagramas.md) | "
+             "UML, BPMN, DER e dicionário de dados |")
+    L.append("| [Apêndice B — Reprodução das medições](apendice-b-reproducao.md) | "
+             "Como reexecutar cada medição, e o que não reproduz |")
+    L.append("| [Registro de medições](medicoes/registro-medicoes.md) | "
+             "Tabela mestra: valor, ferramenta, versão, evidência, veredito |")
+    L.append("| [Evidências brutas](medicoes/evidencias/) | "
+             "Saídas originais das ferramentas, por data |")
+    L.append("")
+    L.append("### Como citar\n")
+    L.append("> VIEIRA, Pedro Conrado Fernandes; COSTA, Richardy Gabriel Rodrigues da. "
+             "**Apêndice C — Evidências de execução**: material suplementar. Franca: "
+             f"Uni-FACEF, 2026. Disponível em: {APENDICE_C_URL}. Acesso em: [data].")
+
+    destino.write_text("\n".join(L) + "\n", encoding="utf-8")
+    return destino
+
+
 def main():
     # 1. O artigo — sem apêndice, terminando nas Referências.
     a = Artigo(ORIGEM)
@@ -2007,7 +2429,6 @@ def main():
     secao_6(a)
     secao_7(a)
     secao_8(a)
-    secao_9(a)
     referencias(a)
     a.salvar(SAIDA)
     print(f"Gerado: {SAIDA}")
@@ -2020,12 +2441,31 @@ def main():
     print(f"Gerado: {SAIDA_APENDICE}")
     print(f"  parágrafos: {len(b.doc.paragraphs)} | tabelas: {b.n_tabela} | figuras: {b.n_figura}")
 
-    # O artigo consome as imagens 1 a 3 e o apêndice as 4 a 13; juntos, todas as 13.
-    # Um desencontro aqui significa legenda trocada em silêncio — daí a verificação.
-    if a.n_figura != 3 or b.n_figura != 10:
+    # 3. O Apêndice C — as capturas das execuções, com numeração C.x.
+    c = Artigo(ORIGEM)
+    apendice_c(c)
+    c.salvar(SAIDA_APENDICE_C)
+    print(f"Gerado: {SAIDA_APENDICE_C}")
+    print(f"  parágrafos: {len(c.doc.paragraphs)} | tabelas: {c.n_tabela} | figuras: {c.n_figura}")
+
+    # 4. A versão navegável do Apêndice C — é o alvo da URL citada nas Referências.
+    print(f"Gerado: {gerar_apendice_c_md()}")
+
+    # O artigo consome as imagens 1 a 3 da origem e o apêndice A as 4 a 13; juntos, todas
+    # as 13. A verificação é sobre o CURSOR de imagens da origem, não sobre o total de
+    # figuras: o corpo do artigo passou a numerar também as capturas de execução, lidas
+    # de arquivo, e o Apêndice C é composto só por elas. Um desencontro no cursor
+    # significaria legenda de diagrama trocada em silêncio — daí a verificação.
+    if a.i_imagem != 3 or b.i_imagem != 13 or c.i_imagem != 0:
         raise SystemExit(
-            f"Contagem inesperada de figuras: artigo={a.n_figura} (esperado 3), "
-            f"apêndice={b.n_figura} (esperado 10)."
+            f"Consumo inesperado das imagens da origem: artigo={a.i_imagem} (esperado 3), "
+            f"apêndice A={b.i_imagem} (esperado 13), apêndice C={c.i_imagem} (esperado 0)."
+        )
+    if a.n_figura != 9 or b.n_figura != 10 or c.n_figura != len(CAPTURAS):
+        raise SystemExit(
+            f"Contagem inesperada de figuras: artigo={a.n_figura} (esperado 9), "
+            f"apêndice A={b.n_figura} (esperado 10), "
+            f"apêndice C={c.n_figura} (esperado {len(CAPTURAS)})."
         )
 
 
